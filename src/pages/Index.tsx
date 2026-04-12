@@ -4,7 +4,6 @@ import { Shield, CheckCircle, Package, ArrowRight } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { listings, categoryLabels } from "@/data/seedData";
 import heroBg from "@/assets/hero-bg.jpg";
-import { listings, categoryLabels } from "@/data/seedData";
 
 const categories = [
   { key: "lehenga", emoji: "👗" },
