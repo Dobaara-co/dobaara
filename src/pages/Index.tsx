@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, CheckCircle, Package, ArrowRight } from "lucide-react";
+import { Lock, BadgeCheck, Truck, MoveRight } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { listings, categoryLabels } from "@/data/seedData";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -10,7 +10,6 @@ const categories = [
   { key: "saree", emoji: "🧣" },
   { key: "salwar_kameez", emoji: "👘" },
   { key: "anarkali", emoji: "✨" },
-  { key: "jewellery", emoji: "💎" },
   { key: "sherwani", emoji: "🤵" },
 ];
 
