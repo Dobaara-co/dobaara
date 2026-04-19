@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, CheckCircle, Package, ArrowRight } from "lucide-react";
+import { Lock, BadgeCheck, Truck, MoveRight } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { listings, categoryLabels } from "@/data/seedData";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -10,7 +10,6 @@ const categories = [
   { key: "saree", emoji: "🧣" },
   { key: "salwar_kameez", emoji: "👘" },
   { key: "anarkali", emoji: "✨" },
-  { key: "jewellery", emoji: "💎" },
   { key: "sherwani", emoji: "🤵" },
 ];
 
@@ -45,10 +44,10 @@ const Index = () => {
                 <Button variant="heroOutline" size="lg">Start Selling</Button>
               </Link>
             </div>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> Secure Payments</span>
-              <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Verified Sellers</span>
-              <span className="flex items-center gap-1"><Package className="h-3.5 w-3.5" /> Tracked Postage</span>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" strokeWidth={1.5} /> Secure Payments</span>
+              <span className="flex items-center gap-1.5"><BadgeCheck className="h-3.5 w-3.5" strokeWidth={1.5} /> Verified Sellers</span>
+              <span className="flex items-center gap-1.5"><Truck className="h-3.5 w-3.5" strokeWidth={1.5} /> Tracked Postage</span>
             </div>
           </div>
         </div>
@@ -57,7 +56,7 @@ const Index = () => {
       {/* Categories */}
       <section className="container py-12">
         <h2 className="text-2xl font-bold text-center mb-6">Shop by Category</h2>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
           {categories.map((cat) => (
             <Link
               key={cat.key}
@@ -82,7 +81,7 @@ const Index = () => {
             Premium items, professionally presented. Send us your piece and we handle everything.
           </p>
           <Link to="/dobaara-verified" className="mt-6 inline-block">
-            <Button variant="gold" size="lg">Submit an Item <ArrowRight className="h-4 w-4 ml-1" /></Button>
+            <Button variant="gold" size="lg">Submit an Item <MoveRight className="h-4 w-4 ml-1.5" strokeWidth={1.5} /></Button>
           </Link>
         </div>
       </section>
@@ -91,8 +90,8 @@ const Index = () => {
       <section className="container py-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">New Arrivals</h2>
-          <Link to="/browse" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
-            View all <ArrowRight className="h-3.5 w-3.5" />
+          <Link to="/browse" className="text-sm font-medium text-primary hover:underline flex items-center gap-1.5">
+            View all <MoveRight className="h-3.5 w-3.5" strokeWidth={1.5} />
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
