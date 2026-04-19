@@ -18,6 +18,7 @@ const sortOptions = [
 
 const Browse = () => {
   const [searchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const initialCategory = searchParams.get("category");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : []);
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
