@@ -1,16 +1,17 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Lock, BadgeCheck, Truck, MoveRight } from "lucide-react";
+import { Lock, BadgeCheck, Truck, MoveRight, Sparkle } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { listings, categoryLabels } from "@/data/seedData";
 import heroBg from "@/assets/hero-bg.jpg";
+import { LehengaIcon, SareeIcon, SalwarIcon, AnarkaliIcon, SherwaniIcon } from "@/components/CategoryIcons";
 
 const categories = [
-  { key: "lehenga", emoji: "👗" },
-  { key: "saree", emoji: "🧣" },
-  { key: "salwar_kameez", emoji: "👘" },
-  { key: "anarkali", emoji: "✨" },
-  { key: "sherwani", emoji: "🤵" },
+  { key: "lehenga", Icon: LehengaIcon },
+  { key: "saree", Icon: SareeIcon },
+  { key: "salwar_kameez", Icon: SalwarIcon },
+  { key: "anarkali", Icon: AnarkaliIcon },
+  { key: "sherwani", Icon: SherwaniIcon },
 ];
 
 const Index = () => {
@@ -61,10 +62,10 @@ const Index = () => {
             <Link
               key={cat.key}
               to={`/browse?category=${cat.key}`}
-              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md hover:-translate-y-0.5"
+              className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-gold/40"
             >
-              <span className="text-3xl">{cat.emoji}</span>
-              <span className="text-xs font-medium text-center">{categoryLabels[cat.key]}</span>
+              <cat.Icon className="h-10 w-10 text-primary/80 group-hover:text-primary transition-colors" />
+              <span className="text-xs font-medium text-center tracking-wide">{categoryLabels[cat.key]}</span>
             </Link>
           ))}
         </div>
@@ -74,7 +75,7 @@ const Index = () => {
       <section className="container">
         <div className="rounded-2xl bg-gradient-to-r from-gold-light to-secondary border border-gold/20 p-8 md:p-12 text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-primary mb-4">
-            ✦ Dobaara Verified
+            <Sparkle className="h-3 w-3" strokeWidth={1.5} /> Dobaara Verified
           </span>
           <h2 className="text-2xl md:text-3xl font-bold">We photograph, verify and ship for you.</h2>
           <p className="mt-2 text-muted-foreground max-w-md mx-auto">
