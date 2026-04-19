@@ -44,10 +44,10 @@ const Index = () => {
                 <Button variant="heroOutline" size="lg">Start Selling</Button>
               </Link>
             </div>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> Secure Payments</span>
-              <span className="flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Verified Sellers</span>
-              <span className="flex items-center gap-1"><Package className="h-3.5 w-3.5" /> Tracked Postage</span>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" strokeWidth={1.5} /> Secure Payments</span>
+              <span className="flex items-center gap-1.5"><BadgeCheck className="h-3.5 w-3.5" strokeWidth={1.5} /> Verified Sellers</span>
+              <span className="flex items-center gap-1.5"><Truck className="h-3.5 w-3.5" strokeWidth={1.5} /> Tracked Postage</span>
             </div>
           </div>
         </div>
