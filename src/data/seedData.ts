@@ -484,10 +484,10 @@ export const formatPrice = (pence: number) => {
 };
 
 export const conditionColors: Record<string, string> = {
-  excellent: "bg-success text-success-foreground",
-  very_good: "bg-blue-600 text-primary-foreground",
-  good: "bg-amber-500 text-accent-foreground",
-  fair: "bg-muted-foreground text-primary-foreground",
+  excellent: "bg-gold text-accent-foreground",
+  very_good: "bg-terracotta text-terracotta-foreground",
+  good: "bg-mocha text-mocha-foreground",
+  fair: "bg-stone-warm text-stone-warm-foreground",
 };
 
 export const conditionLabels: Record<string, string> = {

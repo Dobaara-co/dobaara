@@ -1,10 +1,34 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Lock, BadgeCheck, Truck, MoveRight, Sparkle } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { listings, categoryLabels } from "@/data/seedData";
 import heroBg from "@/assets/hero-bg.jpg";
-import { LehengaIcon, SareeIcon, SalwarIcon, AnarkaliIcon, SherwaniIcon } from "@/components/CategoryIcons";
+import taraCream from "@/assets/tara-cream.jpg";
+import taraBlush from "@/assets/tara-blush.jpg";
+import taraTeal from "@/assets/tara-teal.jpg";
+import taraBeige from "@/assets/tara-beige.jpg";
+import verifiedPhotograph from "@/assets/verified-photograph.jpg";
+import verifiedVerify from "@/assets/verified-verify.jpg";
+import verifiedShip from "@/assets/verified-ship.jpg";
+import {
+  LehengaIcon,
+  SareeIcon,
+  SalwarIcon,
+  AnarkaliIcon,
+  SherwaniIcon,
+  DupattaIcon,
+  AccessoriesIcon,
+  SketchLockIcon,
+  SketchVerifiedIcon,
+  SketchTruckIcon,
+  SketchArrowRight,
+  SketchSparkle,
+  SketchBagIcon,
+  SketchTagIcon,
+  SketchDropletIcon,
+  SketchLeafIcon,
+  SketchHomeHeartIcon,
+} from "@/components/CategoryIcons";
 
 const categories = [
   { key: "lehenga", Icon: LehengaIcon },
@@ -12,10 +36,29 @@ const categories = [
   { key: "salwar_kameez", Icon: SalwarIcon },
   { key: "anarkali", Icon: AnarkaliIcon },
   { key: "sherwani", Icon: SherwaniIcon },
+  { key: "dupatta", Icon: DupattaIcon },
+  { key: "accessories", Icon: AccessoriesIcon },
+];
+
+const taraImages = [taraCream, taraBlush, taraTeal, taraBeige];
+
+const verifiedSteps = [
+  { title: "Photograph", img: verifiedPhotograph },
+  { title: "Verify", img: verifiedVerify },
+  { title: "Ship", img: verifiedShip },
+];
+
+const sustainabilityStats = [
+  { Icon: SketchDropletIcon, value: "85%", label: "less water vs making new" },
+  { Icon: SketchLeafIcon, value: "120kg", label: "CO₂ saved per lehenga" },
+  { Icon: SketchHomeHeartIcon, value: "1,200+", label: "outfits rehomed" },
 ];
 
 const Index = () => {
-  const recentListings = listings.filter((l) => l.isActive && !l.isSold).slice(0, 8);
+  const recentListings = listings
+    .filter((l) => l.isActive && !l.isSold)
+    .slice(0, 4)
+    .map((l, i) => ({ ...l, images: [taraImages[i % taraImages.length]] }));
 
   return (
     <div className="min-h-screen">
@@ -25,9 +68,6 @@ const Index = () => {
           <img src={heroBg} alt="" className="h-full w-full object-cover" width={1920} height={1080} />
           <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
         </div>
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
         <div className="container relative py-20 md:py-32">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
@@ -39,16 +79,20 @@ const Index = () => {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link to="/browse">
-                <Button variant="hero" size="lg">Shop Now</Button>
+                <Button variant="hero" size="lg" className="font-bold">
+                  <SketchBagIcon className="h-4 w-4" /> Shop Now
+                </Button>
               </Link>
               <Link to="/sell">
-                <Button variant="heroOutline" size="lg">Start Selling</Button>
+                <Button variant="heroOutline" size="lg" className="font-bold">
+                  <SketchTagIcon className="h-4 w-4" /> Start Selling
+                </Button>
               </Link>
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" strokeWidth={1.5} /> Secure Payments</span>
-              <span className="flex items-center gap-1.5"><BadgeCheck className="h-3.5 w-3.5" strokeWidth={1.5} /> Verified Sellers</span>
-              <span className="flex items-center gap-1.5"><Truck className="h-3.5 w-3.5" strokeWidth={1.5} /> Tracked Postage</span>
+              <span className="flex items-center gap-1.5"><SketchLockIcon className="h-4 w-4 text-primary" /> Secure Payments</span>
+              <span className="flex items-center gap-1.5"><SketchVerifiedIcon className="h-4 w-4 text-primary" /> Verified Sellers</span>
+              <span className="flex items-center gap-1.5"><SketchTruckIcon className="h-4 w-4 text-primary" /> Tracked Postage</span>
             </div>
           </div>
         </div>
@@ -57,7 +101,7 @@ const Index = () => {
       {/* Categories */}
       <section className="container py-12">
         <h2 className="text-2xl font-bold text-center mb-6">Shop by Category</h2>
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
           {categories.map((cat) => (
             <Link
               key={cat.key}
@@ -71,19 +115,48 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Dobaara Verified banner */}
+      {/* Dobaara Verified — three-image triptych */}
       <section className="container">
-        <div className="rounded-2xl bg-gradient-to-r from-gold-light to-secondary border border-gold/20 p-8 md:p-12 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-primary mb-4">
-            <Sparkle className="h-3 w-3" strokeWidth={1.5} /> Dobaara Verified
-          </span>
-          <h2 className="text-2xl md:text-3xl font-bold">We photograph, verify and ship for you.</h2>
-          <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-            Premium items, professionally presented. Send us your piece and we handle everything.
-          </p>
-          <Link to="/dobaara-verified" className="mt-6 inline-block">
-            <Button variant="gold" size="lg">Submit an Item <MoveRight className="h-4 w-4 ml-1.5" strokeWidth={1.5} /></Button>
-          </Link>
+        <div className="rounded-2xl bg-gradient-to-r from-gold-light to-secondary border border-gold/20 p-8 md:p-12">
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-primary mb-4">
+              <SketchSparkle className="h-3.5 w-3.5" /> Dobaara Verified
+            </span>
+            <h2 className="text-2xl md:text-3xl font-bold">We photograph, verify and ship for you.</h2>
+            <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+              Premium items, professionally presented. Send us your piece and we handle everything.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8">
+            {verifiedSteps.map((s) => (
+              <figure key={s.title} className="text-center">
+                <div className="relative aspect-square overflow-hidden rounded-xl border border-gold/20">
+                  <img
+                    src={s.img}
+                    alt={s.title}
+                    loading="lazy"
+                    width={800}
+                    height={800}
+                    className="h-full w-full object-cover opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-gold/10 to-chai/20" />
+                </div>
+                <figcaption className="mt-3 font-display text-base md:text-xl font-semibold text-primary">
+                  {s.title}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link to="/dobaara-verified" className="inline-block">
+              <Button variant="gold" size="lg" className="font-bold">
+                <SketchSparkle className="h-4 w-4" /> Submit an Item
+                <SketchArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -92,7 +165,7 @@ const Index = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">New Arrivals</h2>
           <Link to="/browse" className="text-sm font-medium text-primary hover:underline flex items-center gap-1.5">
-            View all <MoveRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+            View all <SketchArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -105,9 +178,11 @@ const Index = () => {
       {/* How it works */}
       <section className="container py-12">
         <h2 className="text-2xl font-bold text-center mb-10">How It Works</h2>
-        <div className="grid md:grid-cols-2 gap-12">
-          <div>
-            <h3 className="font-display text-lg font-semibold mb-4 text-primary">For Sellers</h3>
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 relative">
+          {/* Sellers */}
+          <div className="rounded-2xl border border-border bg-secondary/40 p-6 md:p-8">
+            <p className="font-mono text-xs tracking-[0.2em] text-muted-foreground mb-4">FOR SELLERS</p>
+            <h3 className="font-display text-lg font-semibold mb-5 text-primary">List, sell, get paid.</h3>
             <div className="space-y-4">
               {[
                 { step: "1", title: "List in minutes", desc: "Upload photos, add details and set your price." },
@@ -126,8 +201,14 @@ const Index = () => {
               ))}
             </div>
           </div>
-          <div>
-            <h3 className="font-display text-lg font-semibold mb-4 text-primary">For Buyers</h3>
+
+          {/* Divider line — vertical on desktop, horizontal on mobile is implicit via gap */}
+          <div className="hidden md:block absolute left-1/2 top-4 bottom-4 w-px bg-border -translate-x-1/2 pointer-events-none" />
+
+          {/* Buyers */}
+          <div className="rounded-2xl border border-border bg-gold-light/40 p-6 md:p-8">
+            <p className="font-mono text-xs tracking-[0.2em] text-muted-foreground mb-4">FOR BUYERS</p>
+            <h3 className="font-display text-lg font-semibold mb-5 text-primary">Browse, buy, wear again.</h3>
             <div className="space-y-4">
               {[
                 { step: "1", title: "Browse thousands of pieces", desc: "From lehengas to sherwanis — every category covered." },
@@ -149,19 +230,21 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Community stats */}
+      {/* Sustainability stats */}
       <section className="border-y border-border bg-card py-10">
-        <div className="container flex flex-wrap items-center justify-center gap-8 md:gap-16 text-center">
-          {[
-            { value: "2,400+", label: "Listings" },
-            { value: "380+", label: "Sellers" },
-            { value: "1,200+", label: "Happy Buyers" },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <p className="font-display text-3xl font-bold text-primary">{stat.value}</p>
-              <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-            </div>
-          ))}
+        <div className="container">
+          <p className="text-center font-mono text-xs tracking-[0.2em] text-muted-foreground mb-6">
+            EVERY RESALE MATTERS
+          </p>
+          <div className="flex flex-wrap items-start justify-center gap-10 md:gap-20 text-center">
+            {sustainabilityStats.map((stat) => (
+              <div key={stat.label} className="flex flex-col items-center max-w-[180px]">
+                <stat.Icon className="h-7 w-7 text-gold mb-3" />
+                <p className="font-display text-3xl font-bold text-primary">{stat.value}</p>
+                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
