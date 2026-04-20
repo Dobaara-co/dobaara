@@ -64,6 +64,18 @@ export default {
           DEFAULT: "hsl(var(--chai))",
           light: "hsl(var(--chai-light))",
         },
+        terracotta: {
+          DEFAULT: "hsl(var(--terracotta))",
+          foreground: "hsl(var(--terracotta-foreground))",
+        },
+        mocha: {
+          DEFAULT: "hsl(var(--mocha))",
+          foreground: "hsl(var(--mocha-foreground))",
+        },
+        "stone-warm": {
+          DEFAULT: "hsl(var(--stone-warm))",
+          foreground: "hsl(var(--stone-warm-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

@@ -55,6 +55,13 @@
     --chai-light: 25 30% 55%;
     --cream: 36 50% 96%;
     --warm-border: 30 25% 87%;
+    /* Warm condition / accent palette */
+    --terracotta: 17 76% 40%;
+    --terracotta-foreground: 36 50% 96%;
+    --mocha: 30 24% 53%;
+    --mocha-foreground: 36 50% 96%;
+    --stone-warm: 30 12% 48%;
+    --stone-warm-foreground: 36 50% 96%;
   }
 
   .dark {
