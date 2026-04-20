@@ -1,23 +1,18 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ListingCard from "@/components/ListingCard";
-import { listings, categoryLabels } from "@/data/seedData";
+import { listings } from "@/data/seedData";
 import heroBg from "@/assets/hero-bg.jpg";
 import taraCream from "@/assets/tara-cream.jpg";
 import taraBlush from "@/assets/tara-blush.jpg";
 import taraTeal from "@/assets/tara-teal.jpg";
 import taraBeige from "@/assets/tara-beige.jpg";
-import verifiedPhotograph from "@/assets/verified-photograph.jpg";
-import verifiedVerify from "@/assets/verified-verify.jpg";
-import verifiedShip from "@/assets/verified-ship.jpg";
+import verifiedBanner from "@/assets/dobaara-verified-banner.jpeg";
+import catLehenga from "@/assets/cat-lehenga.jpg";
+import catSalwar from "@/assets/cat-salwar.jpg";
+import catSaree from "@/assets/cat-saree.jpg";
+import catAnarkali from "@/assets/cat-anarkali.jpg";
 import {
-  LehengaIcon,
-  SareeIcon,
-  SalwarIcon,
-  AnarkaliIcon,
-  SherwaniIcon,
-  DupattaIcon,
-  AccessoriesIcon,
   SketchLockIcon,
   SketchVerifiedIcon,
   SketchTruckIcon,
@@ -31,22 +26,13 @@ import {
 } from "@/components/CategoryIcons";
 
 const categories = [
-  { key: "lehenga", Icon: LehengaIcon },
-  { key: "saree", Icon: SareeIcon },
-  { key: "salwar_kameez", Icon: SalwarIcon },
-  { key: "anarkali", Icon: AnarkaliIcon },
-  { key: "sherwani", Icon: SherwaniIcon },
-  { key: "dupatta", Icon: DupattaIcon },
-  { key: "accessories", Icon: AccessoriesIcon },
+  { key: "lehenga", label: "Lehenga", img: catLehenga },
+  { key: "salwar_kameez", label: "Salwar Kameez", img: catSalwar },
+  { key: "saree", label: "Saree", img: catSaree },
+  { key: "anarkali", label: "Anarkali", img: catAnarkali },
 ];
 
 const taraImages = [taraCream, taraBlush, taraTeal, taraBeige];
-
-const verifiedSteps = [
-  { title: "Photograph", img: verifiedPhotograph },
-  { title: "Verify", img: verifiedVerify },
-  { title: "Ship", img: verifiedShip },
-];
 
 const sustainabilityStats = [
   { Icon: SketchDropletIcon, value: "85%", label: "less water vs making new" },
@@ -98,65 +84,62 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Shop by Category */}
       <section className="container py-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Shop by Category</h2>
-        <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <span className="h-px w-12 bg-gold/50" />
+          <span className="text-gold text-sm">◆</span>
+          <h2 className="font-display text-2xl md:text-3xl font-semibold tracking-[0.15em] text-primary uppercase">
+            Shop by Category
+          </h2>
+          <span className="text-gold text-sm">◆</span>
+          <span className="h-px w-12 bg-gold/50" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {categories.map((cat) => (
             <Link
               key={cat.key}
               to={`/browse?category=${cat.key}`}
-              className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-gold/40"
+              className="group block overflow-hidden rounded-2xl border border-primary/20 bg-secondary/30 transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/40"
             >
-              <cat.Icon className="h-10 w-10 text-primary/80 group-hover:text-primary transition-colors" />
-              <span className="text-xs font-medium text-center tracking-wide">{categoryLabels[cat.key]}</span>
+              <div className="aspect-[3/5] overflow-hidden bg-secondary/40">
+                <img
+                  src={cat.img}
+                  alt={cat.label}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Dobaara Verified — three-image triptych */}
+      {/* Dobaara Verified — reference banner */}
       <section className="container">
-        <div className="rounded-2xl bg-gradient-to-r from-gold-light to-secondary border border-gold/20 p-8 md:p-12">
-          <div className="text-center mb-8">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-primary mb-4">
-              <SketchSparkle className="h-3.5 w-3.5" /> Dobaara Verified
-            </span>
-            <h2 className="text-2xl md:text-3xl font-bold">We photograph, verify and ship for you.</h2>
-            <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-              Premium items, professionally presented. Send us your piece and we handle everything.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 md:gap-6 mb-8">
-            {verifiedSteps.map((s) => (
-              <figure key={s.title} className="text-center">
-                <div className="relative aspect-square overflow-hidden rounded-xl border border-gold/20">
-                  <img
-                    src={s.img}
-                    alt={s.title}
-                    loading="lazy"
-                    width={800}
-                    height={800}
-                    className="h-full w-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-gold/10 to-chai/20" />
-                </div>
-                <figcaption className="mt-3 font-display text-base md:text-xl font-semibold text-primary">
-                  {s.title}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link to="/dobaara-verified" className="inline-block">
-              <Button variant="gold" size="lg" className="font-bold">
-                <SketchSparkle className="h-4 w-4" /> Submit an Item
-                <SketchArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+        <div className="text-center mb-6">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary">
+            Dobaara Verified
+          </h2>
+          <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+            We photograph, authenticate and ship — so you don't have to.
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-gold/20">
+          <img
+            src={verifiedBanner}
+            alt="Dobaara Verified — we photograph, verify and ship"
+            loading="lazy"
+            className="block w-full h-auto"
+          />
+        </div>
+        <div className="text-center mt-6">
+          <Link to="/dobaara-verified" className="inline-block">
+            <Button variant="gold" size="lg" className="font-bold">
+              <SketchSparkle className="h-4 w-4" /> Submit an Item
+              <SketchArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 
