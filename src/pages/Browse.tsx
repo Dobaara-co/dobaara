@@ -4,6 +4,8 @@ import { categoryLabels, conditionLabels } from "@/data/seedData";
 import { useListings, type ListingFilters } from "@/hooks/useListings";
 import ListingCard from "@/components/ListingCard";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { SlidersHorizontal, X } from "lucide-react";
 
 const occasions = ["wedding", "eid", "diwali", "mehendi", "sangeet", "casual", "party"];
@@ -17,6 +19,7 @@ const sortOptions = [
 
 const Browse = () => {
   const [searchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const initialCategory = searchParams.get("category");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : []);
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
@@ -129,37 +132,25 @@ const Browse = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">
-          {isLoading ? "Loading…" : `Showing ${filtered.length} listing${filtered.length !== 1 ? "s" : ""}`}
-        </p>
+      <div className="flex items-center justify-between mb-4 gap-2">
         <div className="flex items-center gap-2">
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as ListingFilters["sort"])}
-            className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
-          >
-            {sortOptions.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
-          <Button variant="outline" size="sm" className="md:hidden" onClick={() => setShowFilters(true)}>
-            <SlidersHorizontal className="h-4 w-4 mr-1" /> Filters {activeFilters > 0 && `(${activeFilters})`}
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(true)}>
+            <SlidersHorizontal className="h-4 w-4 mr-1.5" strokeWidth={1.5} /> Filters {activeFilters > 0 && `(${activeFilters})`}
           </Button>
+          <p className="text-sm text-muted-foreground hidden sm:block">{filtered.length} listings</p>
         </div>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as ListingFilters["sort"])}
+          className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+        >
+          {sortOptions.map((s) => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
       </div>
 
       <div className="flex gap-6">
-        {/* Desktop sidebar */}
-        <aside className="hidden md:block w-64 shrink-0">
-          <div className="sticky top-20 rounded-lg border border-border bg-card">
-            <div className="p-4 border-b border-border">
-              <h3 className="font-semibold text-sm">Filters</h3>
-            </div>
-            {filtersContent}
-          </div>
-        </aside>
-
         {/* Grid */}
         <div className="flex-1">
           {isLoading ? (
@@ -185,26 +176,23 @@ const Browse = () => {
         </div>
       </div>
 
-      {/* Mobile filter sheet */}
-      {showFilters && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-foreground/50" onClick={() => setShowFilters(false)} />
-          <div className="absolute bottom-0 left-0 right-0 max-h-[80vh] overflow-y-auto rounded-t-2xl bg-background animate-fade-in">
-            <div className="sticky top-0 flex items-center justify-between border-b border-border bg-background p-4">
-              <h3 className="font-semibold">Filters</h3>
-              <Button variant="ghost" size="icon" onClick={() => setShowFilters(false)}>
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            {filtersContent}
-            <div className="sticky bottom-0 border-t border-border bg-background p-4">
-              <Button className="w-full" onClick={() => setShowFilters(false)}>
-                Show {filtered.length} results
-              </Button>
-            </div>
+      {/* Filter drawer: left on desktop, bottom sheet on mobile */}
+      <Sheet open={showFilters} onOpenChange={setShowFilters}>
+        <SheetContent
+          side={isMobile ? "bottom" : "left"}
+          className={isMobile ? "h-[85vh] rounded-t-2xl p-0 flex flex-col" : "w-full sm:max-w-md p-0 flex flex-col"}
+        >
+          <SheetHeader className="border-b border-border p-4">
+            <SheetTitle className="text-left">Filters</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto">{filtersContent}</div>
+          <div className="border-t border-border bg-background p-4">
+            <Button className="w-full" onClick={() => setShowFilters(false)}>
+              Apply filters · {filtered.length} results
+            </Button>
           </div>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

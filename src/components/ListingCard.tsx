@@ -1,14 +1,15 @@
-import { Heart, Award } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { type Listing, formatPrice, conditionColors, conditionLabels } from "@/data/seedData";
+import { type Listing, formatPrice, conditionColors, conditionLabels, getSeller } from "@/data/seedData";
 import { useSavedListings, useToggleSave } from "@/hooks/useSavedListings";
 import { useAuth } from "@/contexts/AuthContext";
+import { SketchHeartIcon, SketchVerifiedIcon } from "@/components/CategoryIcons";
 
 const ListingCard = ({ listing }: { listing: Listing }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: savedSet } = useSavedListings();
   const toggleSave = useToggleSave();
+  const seller = getSeller(listing.sellerId);
 
   const isSaved = savedSet?.has(listing.id) ?? false;
   const discount = listing.originalPrice
@@ -43,7 +44,7 @@ const ListingCard = ({ listing }: { listing: Listing }) => {
           {/* VIP Badge */}
           {listing.isVipVerified && (
             <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-gold px-2.5 py-1 text-xs font-semibold text-accent-foreground shadow-sm">
-              <Award className="h-3 w-3" />
+              <SketchVerifiedIcon className="h-3 w-3" />
               Verified
             </div>
           )}
@@ -52,27 +53,28 @@ const ListingCard = ({ listing }: { listing: Listing }) => {
           <button
             onClick={handleSaveClick}
             disabled={toggleSave.isPending}
-            className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm transition-colors hover:bg-card"
+            className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-card/85 backdrop-blur-sm transition-colors hover:bg-card"
+            aria-label="Save listing"
           >
-            <Heart className={`h-4 w-4 transition-colors ${isSaved ? "fill-destructive text-destructive" : "text-muted-foreground"}`} />
+            <SketchHeartIcon
+              className={`h-4 w-4 transition-colors ${isSaved ? "fill-terracotta text-terracotta" : "text-muted-foreground"}`}
+            />
           </button>
 
-          {/* Discount badge */}
+          {/* Discount badge — terracotta */}
           {discount && discount > 20 && (
-            <div className="absolute bottom-2 left-2 rounded-full bg-success px-2 py-0.5 text-xs font-semibold text-success-foreground">
+            <div className="absolute bottom-2 left-2 rounded-full bg-terracotta px-2 py-0.5 text-xs font-semibold text-terracotta-foreground">
               Save {discount}%
             </div>
           )}
         </div>
 
-        {/* Details */}
+        {/* Details — minimal: title, seller, price, condition + size */}
         <div className="p-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">{listing.title}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{listing.designerBrand}</p>
-            </div>
-          </div>
+          <p className="truncate text-sm font-semibold text-foreground">{listing.title}</p>
+          {seller && (
+            <p className="mt-0.5 text-xs text-muted-foreground truncate">@{seller.username}</p>
+          )}
 
           <div className="mt-2 flex items-center gap-2">
             <span className="text-base font-bold text-primary">{formatPrice(listing.price)}</span>
@@ -86,9 +88,6 @@ const ListingCard = ({ listing }: { listing: Listing }) => {
               {conditionLabels[listing.condition]}
             </span>
             <span className="text-xs text-muted-foreground">Size {listing.sizeLabel}</span>
-            {listing.freePostage && (
-              <span className="text-xs text-success font-medium">Free postage</span>
-            )}
           </div>
         </div>
       </div>
