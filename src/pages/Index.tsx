@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, CheckCircle, Package, ArrowRight } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
-import { listings, categoryLabels } from "@/data/seedData";
+import { categoryLabels } from "@/data/seedData";
+import { useListings } from "@/hooks/useListings";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const categories = [
@@ -15,7 +16,7 @@ const categories = [
 ];
 
 const Index = () => {
-  const recentListings = listings.filter((l) => l.isActive && !l.isSold).slice(0, 8);
+  const { data: recentListings = [], isLoading } = useListings({ limit: 8, sort: "newest" });
 
   return (
     <div className="min-h-screen">
@@ -95,11 +96,19 @@ const Index = () => {
             View all <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {recentListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-[3/4] rounded-xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {recentListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* How it works */}

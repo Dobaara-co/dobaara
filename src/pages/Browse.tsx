@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { listings, categoryLabels, conditionLabels } from "@/data/seedData";
+import { categoryLabels, conditionLabels } from "@/data/seedData";
+import { useListings, type ListingFilters } from "@/hooks/useListings";
 import ListingCard from "@/components/ListingCard";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 
 const occasions = ["wedding", "eid", "diwali", "mehendi", "sangeet", "casual", "party"];
 const sizes = ["XS", "S", "M", "L", "XL", "XXL", "Free Size", "Custom"];
@@ -21,29 +22,22 @@ const Browse = () => {
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [sort, setSort] = useState("newest");
+  const [sort, setSort] = useState<ListingFilters["sort"]>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  const { data: filtered = [], isLoading } = useListings({
+    categories: selectedCategories.length ? selectedCategories : undefined,
+    occasions: selectedOccasions.length ? selectedOccasions : undefined,
+    conditions: selectedConditions.length ? selectedConditions : undefined,
+    sizes: selectedSizes.length ? selectedSizes : undefined,
+    verifiedOnly: verifiedOnly || undefined,
+    sort,
+  });
 
   const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
     setter(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
   };
-
-  const filtered = useMemo(() => {
-    let result = listings.filter((l) => l.isActive && !l.isSold);
-    if (selectedCategories.length) result = result.filter((l) => selectedCategories.includes(l.category));
-    if (selectedOccasions.length) result = result.filter((l) => selectedOccasions.includes(l.occasion));
-    if (selectedConditions.length) result = result.filter((l) => selectedConditions.includes(l.condition));
-    if (selectedSizes.length) result = result.filter((l) => selectedSizes.includes(l.sizeLabel));
-    if (verifiedOnly) result = result.filter((l) => l.isVipVerified);
-
-    switch (sort) {
-      case "price_asc": return [...result].sort((a, b) => a.price - b.price);
-      case "price_desc": return [...result].sort((a, b) => b.price - a.price);
-      case "most_saved": return [...result].sort((a, b) => b.savesCount - a.savesCount);
-      default: return [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    }
-  }, [selectedCategories, selectedOccasions, selectedConditions, selectedSizes, sort, verifiedOnly]);
 
   const activeFilters = selectedCategories.length + selectedOccasions.length + selectedConditions.length + selectedSizes.length + (verifiedOnly ? 1 : 0);
 
@@ -136,11 +130,13 @@ const Browse = () => {
       )}
 
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">Showing {filtered.length} listings</p>
+        <p className="text-sm text-muted-foreground">
+          {isLoading ? "Loading…" : `Showing ${filtered.length} listing${filtered.length !== 1 ? "s" : ""}`}
+        </p>
         <div className="flex items-center gap-2">
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value)}
+            onChange={(e) => setSort(e.target.value as ListingFilters["sort"])}
             className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
           >
             {sortOptions.map((s) => (
@@ -166,12 +162,20 @@ const Browse = () => {
 
         {/* Grid */}
         <div className="flex-1">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filtered.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
-          </div>
-          {filtered.length === 0 && (
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="aspect-[3/4] rounded-xl bg-muted animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filtered.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          )}
+          {!isLoading && filtered.length === 0 && (
             <div className="text-center py-20">
               <p className="text-lg font-semibold">No listings found</p>
               <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters</p>

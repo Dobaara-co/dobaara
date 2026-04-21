@@ -1,26 +1,44 @@
 import { Heart, Award } from "lucide-react";
-import { Link } from "react-router-dom";
-import { type Listing, formatPrice, conditionColors, conditionLabels, getSeller } from "@/data/seedData";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { type Listing, formatPrice, conditionColors, conditionLabels } from "@/data/seedData";
+import { useSavedListings, useToggleSave } from "@/hooks/useSavedListings";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ListingCard = ({ listing }: { listing: Listing }) => {
-  const [saved, setSaved] = useState(false);
-  const seller = getSeller(listing.sellerId);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { data: savedSet } = useSavedListings();
+  const toggleSave = useToggleSave();
+
+  const isSaved = savedSet?.has(listing.id) ?? false;
   const discount = listing.originalPrice
     ? Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)
     : null;
+
+  function handleSaveClick(e: React.MouseEvent) {
+    e.preventDefault();
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+    toggleSave.mutate({ listingId: listing.id, isSaved })
+  }
 
   return (
     <Link to={`/listing/${listing.id}`} className="group block">
       <div className="relative overflow-hidden rounded-lg bg-card border border-border transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
         {/* Image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-          <img
-            src={listing.images[listing.primaryImageIndex]}
-            alt={listing.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
+          {listing.images[listing.primaryImageIndex] ? (
+            <img
+              src={listing.images[listing.primaryImageIndex]}
+              alt={listing.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
+          )}
 
           {/* VIP Badge */}
           {listing.isVipVerified && (
@@ -32,13 +50,11 @@ const ListingCard = ({ listing }: { listing: Listing }) => {
 
           {/* Save button */}
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              setSaved(!saved);
-            }}
+            onClick={handleSaveClick}
+            disabled={toggleSave.isPending}
             className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm transition-colors hover:bg-card"
           >
-            <Heart className={`h-4 w-4 transition-colors ${saved ? "fill-destructive text-destructive" : "text-muted-foreground"}`} />
+            <Heart className={`h-4 w-4 transition-colors ${isSaved ? "fill-destructive text-destructive" : "text-muted-foreground"}`} />
           </button>
 
           {/* Discount badge */}

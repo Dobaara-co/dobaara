@@ -1,17 +1,46 @@
-import { useParams, Link } from "react-router-dom";
-import { listings, getSeller, formatPrice, conditionColors, conditionLabels, categoryLabels } from "@/data/seedData";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useListing, useListings } from "@/hooks/useListings";
+import { useSavedListings, useToggleSave } from "@/hooks/useSavedListings";
+import { formatPrice, conditionColors, conditionLabels, categoryLabels } from "@/data/seedData";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share2, Award, Star, MapPin, Shield, Package, ArrowLeft } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const ListingDetail = () => {
   const { id } = useParams();
-  const listing = listings.find((l) => l.id === id);
-  const [saved, setSaved] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
 
-  if (!listing) {
+  const { data, isLoading, isError } = useListing(id);
+  const { data: savedSet } = useSavedListings();
+  const toggleSave = useToggleSave();
+
+  const { data: sellerListings = [] } = useListings(
+    data?.listing ? { limit: 5 } : {}
+  );
+
+  // Increment view count once
+  useEffect(() => {
+    if (id) {
+      supabase.rpc('increment_listing_views', { p_listing_id: id }).then(() => {})
+    }
+  }, [id])
+
+  if (isLoading) {
+    return (
+      <div className="container py-20 text-center">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+      </div>
+    )
+  }
+
+  if (isError || !data) {
     return (
       <div className="container py-20 text-center">
         <p className="text-lg font-semibold">Listing not found</p>
@@ -20,13 +49,33 @@ const ListingDetail = () => {
     );
   }
 
-  const seller = getSeller(listing.sellerId);
+  const { listing, seller } = data;
+  const isSaved = savedSet?.has(listing.id) ?? false;
+
   const discount = listing.originalPrice
     ? Math.round(((listing.originalPrice - listing.price) / listing.originalPrice) * 100)
     : null;
 
-  const moreBySeller = listings.filter((l) => l.sellerId === listing.sellerId && l.id !== listing.id && l.isActive).slice(0, 4);
-  const similar = listings.filter((l) => l.category === listing.category && l.id !== listing.id && l.isActive).slice(0, 4);
+  const moreBySeller = sellerListings.filter((l) => l.sellerId === listing.sellerId && l.id !== listing.id).slice(0, 4);
+  const similar = sellerListings.filter((l) => l.category === listing.category && l.id !== listing.id).slice(0, 4);
+
+  function handleSaveToggle() {
+    if (!user) {
+      navigate('/auth', { state: { from: `/listing/${listing.id}` } })
+      return
+    }
+    toggleSave.mutate({ listingId: listing.id, isSaved })
+  }
+
+  function handleMessageSeller() {
+    if (!user) {
+      navigate('/auth', { state: { from: `/listing/${listing.id}` } })
+      return
+    }
+    if (!seller) return
+    navigate('/messages')
+    toast({ title: `Message ${seller.fullName}`, description: 'Open a conversation from the messages page.' })
+  }
 
   const shareOnWhatsApp = () => {
     const text = encodeURIComponent(`Check out this ${listing.title} on Dobaara — ${formatPrice(listing.price)} 👗 ${window.location.href}`);
@@ -43,11 +92,15 @@ const ListingDetail = () => {
         {/* Images */}
         <div>
           <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted">
-            <img
-              src={listing.images[selectedImage]}
-              alt={listing.title}
-              className="h-full w-full object-cover"
-            />
+            {listing.images.length > 0 ? (
+              <img
+                src={listing.images[selectedImage]}
+                alt={listing.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center text-muted-foreground">No image</div>
+            )}
             {listing.isVipVerified && (
               <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-gold px-3 py-1.5 text-sm font-semibold text-accent-foreground shadow">
                 <Award className="h-4 w-4" /> Dobaara Verified
@@ -77,9 +130,11 @@ const ListingDetail = () => {
             <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
               {categoryLabels[listing.category]}
             </span>
-            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground capitalize">
-              {listing.occasion}
-            </span>
+            {listing.occasion && (
+              <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground capitalize">
+                {listing.occasion}
+              </span>
+            )}
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold">{listing.title}</h1>
@@ -102,10 +157,18 @@ const ListingDetail = () => {
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${conditionColors[listing.condition]}`}>
               {conditionLabels[listing.condition]}
             </span>
-            <span className="text-sm text-muted-foreground">·</span>
-            <span className="text-sm text-muted-foreground">{listing.designerBrand}</span>
-            <span className="text-sm text-muted-foreground">·</span>
-            <span className="text-sm text-muted-foreground">Size {listing.sizeLabel}</span>
+            {listing.designerBrand && (
+              <>
+                <span className="text-sm text-muted-foreground">·</span>
+                <span className="text-sm text-muted-foreground">{listing.designerBrand}</span>
+              </>
+            )}
+            {listing.sizeLabel && (
+              <>
+                <span className="text-sm text-muted-foreground">·</span>
+                <span className="text-sm text-muted-foreground">Size {listing.sizeLabel}</span>
+              </>
+            )}
           </div>
 
           {/* Measurements */}
@@ -131,24 +194,27 @@ const ListingDetail = () => {
             ) : (
               <span className="text-muted-foreground">Postage: {formatPrice(listing.postagePrice)}</span>
             )}
-            <span className="text-muted-foreground">· Ships from {listing.shipsFrom}</span>
+            {listing.shipsFrom && <span className="text-muted-foreground">· Ships from {listing.shipsFrom}</span>}
           </div>
 
           {/* Actions */}
           <div className="mt-6 flex flex-col gap-3">
-            <Button variant="hero" size="lg" className="w-full">Buy Now — {formatPrice(listing.price + (listing.freePostage ? 0 : listing.postagePrice))}</Button>
+            <Button variant="hero" size="lg" className="w-full">
+              Buy Now — {formatPrice(listing.price + (listing.freePostage ? 0 : listing.postagePrice))}
+            </Button>
             <div className="flex gap-3">
-              <Button variant="heroOutline" size="lg" className="flex-1">
+              <Button variant="heroOutline" size="lg" className="flex-1" onClick={handleMessageSeller}>
                 <MessageCircle className="h-4 w-4 mr-1" /> Make an Offer
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => setSaved(!saved)}
-                className={saved ? "text-destructive border-destructive" : ""}
+                onClick={handleSaveToggle}
+                disabled={toggleSave.isPending}
+                className={isSaved ? "text-destructive border-destructive" : ""}
               >
-                <Heart className={`h-4 w-4 ${saved ? "fill-destructive" : ""}`} />
-                <span className="ml-1">{listing.savesCount + (saved ? 1 : 0)}</span>
+                <Heart className={`h-4 w-4 ${isSaved ? "fill-destructive" : ""}`} />
+                <span className="ml-1">{listing.savesCount}</span>
               </Button>
             </div>
             <div className="flex gap-3">
@@ -166,7 +232,13 @@ const ListingDetail = () => {
           {seller && (
             <div className="mt-6 rounded-lg border border-border p-4">
               <div className="flex items-center gap-3">
-                <img src={seller.avatarUrl} alt={seller.fullName} className="h-12 w-12 rounded-full object-cover" />
+                {seller.avatarUrl ? (
+                  <img src={seller.avatarUrl} alt={seller.fullName} className="h-12 w-12 rounded-full object-cover" />
+                ) : (
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold text-primary">
+                    {seller.fullName?.[0] ?? seller.username[0]}
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <Link to={`/@${seller.username}`} className="font-semibold text-sm hover:underline">
@@ -177,14 +249,16 @@ const ListingDetail = () => {
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                    <span className="flex items-center gap-0.5"><Star className="h-3 w-3 fill-gold text-gold" /> {seller.averageRating}</span>
+                    {seller.averageRating > 0 && (
+                      <span className="flex items-center gap-0.5"><Star className="h-3 w-3 fill-gold text-gold" /> {seller.averageRating.toFixed(1)}</span>
+                    )}
                     <span>· {seller.totalSalesCount} sales</span>
-                    <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" /> {seller.location}</span>
+                    {seller.location && <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" /> {seller.location}</span>}
                   </div>
                 </div>
               </div>
               <div className="mt-3 flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button variant="outline" size="sm" className="flex-1" onClick={handleMessageSeller}>
                   <MessageCircle className="h-3.5 w-3.5 mr-1" /> Message Seller
                 </Button>
                 <Link to={`/@${seller.username}`} className="flex-1">
