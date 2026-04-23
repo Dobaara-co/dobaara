@@ -13,6 +13,13 @@ import Auth from "./pages/Auth.tsx";
 import Account from "./pages/Account.tsx";
 import CreateListing from "./pages/CreateListing.tsx";
 import Messages from "./pages/Messages.tsx";
+import About from "./pages/About.tsx";
+import HowItWorks from "./pages/HowItWorks.tsx";
+import DobaaraVerified from "./pages/DobaaraVerified.tsx";
+import SellingGuide from "./pages/SellingGuide.tsx";
+import SizeGuide from "./pages/SizeGuide.tsx";
+import FAQ from "./pages/FAQ.tsx";
+import Contact from "./pages/Contact.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient({
@@ -38,6 +45,13 @@ const App = () => (
               <Route path="/account" element={<Account />} />
               <Route path="/sell" element={<CreateListing />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/dobaara-verified" element={<DobaaraVerified />} />
+              <Route path="/selling-guide" element={<SellingGuide />} />
+              <Route path="/size-guide" element={<SizeGuide />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

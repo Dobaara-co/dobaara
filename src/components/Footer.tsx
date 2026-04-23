@@ -1,15 +1,36 @@
-const columns = [
+import { Link } from "react-router-dom";
+
+type FooterLink = { label: string; to: string };
+
+const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: "Dobaara",
-    links: ["About us", "Sustainability", "Press", "Advertising", "Accessibility"],
+    links: [
+      { label: "About us", to: "/about" },
+      { label: "Sustainability", to: "/about" },
+      { label: "Press", to: "#" },
+      { label: "Contact", to: "/contact" },
+      { label: "Accessibility", to: "#" },
+    ],
   },
   {
     title: "Discover",
-    links: ["How it works", "Item Verification", "Mobile apps", "Infoboard"],
+    links: [
+      { label: "How it works", to: "/how-it-works" },
+      { label: "Item Verification", to: "/dobaara-verified" },
+      { label: "Size Guide", to: "/size-guide" },
+      { label: "Selling Guide", to: "/selling-guide" },
+    ],
   },
   {
     title: "Help",
-    links: ["Help Centre", "Selling", "Buying", "Trust and Safety"],
+    links: [
+      { label: "Help Centre", to: "/faq" },
+      { label: "FAQ", to: "/faq" },
+      { label: "Selling", to: "/selling-guide" },
+      { label: "Buying", to: "/how-it-works" },
+      { label: "Trust and Safety", to: "/faq" },
+    ],
   },
 ];
 
@@ -22,10 +43,22 @@ const Footer = () => (
             <h4 className="font-display text-base font-semibold text-foreground mb-4">{col.title}</h4>
             <ul className="space-y-2.5">
               {col.links.map((link) => (
-                <li key={link}>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {link}
-                  </a>
+                <li key={link.label}>
+                  {link.to.startsWith("/") ? (
+                    <Link
+                      to={link.to}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={link.to}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>

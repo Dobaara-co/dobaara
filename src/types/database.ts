@@ -256,8 +256,10 @@ export interface Database {
           email: string
           full_name: string
           item_type: string
+          designer_brand: string | null
           description: string | null
           estimated_value: number | null
+          photo_urls: string[] | null
           status: string
           created_at: string
           updated_at: string
@@ -268,8 +270,10 @@ export interface Database {
           email: string
           full_name: string
           item_type: string
+          designer_brand?: string | null
           description?: string | null
           estimated_value?: number | null
+          photo_urls?: string[] | null
           status?: string
           created_at?: string
           updated_at?: string
@@ -278,6 +282,25 @@ export interface Database {
           status?: string
           updated_at?: string
         }
+      }
+      contact_submissions: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          subject: string
+          message: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          subject: string
+          message: string
+          created_at?: string
+        }
+        Update: never
       }
     }
     Views: {

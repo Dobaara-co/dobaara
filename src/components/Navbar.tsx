@@ -16,7 +16,7 @@ const Navbar = () => {
             Dobaara
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-7">
             <Link to="/browse" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Browse
             </Link>
@@ -25,6 +25,12 @@ const Navbar = () => {
             </Link>
             <Link to="/dobaara-verified" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Dobaara Verified
+            </Link>
+            <Link to="/size-guide" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Size Guide
+            </Link>
+            <Link to="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Contact
             </Link>
           </div>
 
@@ -62,6 +68,10 @@ const Navbar = () => {
               <Link to="/browse" className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>Browse</Link>
               <Link to="/how-it-works" className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>How It Works</Link>
               <Link to="/dobaara-verified" className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>Dobaara Verified</Link>
+              <Link to="/size-guide" className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>Size Guide</Link>
+              <Link to="/selling-guide" className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>Selling Guide</Link>
+              <Link to="/faq" className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>FAQ</Link>
+              <Link to="/contact" className="text-sm font-medium py-2" onClick={() => setMobileOpen(false)}>Contact</Link>
               <Link to="/sell" onClick={() => setMobileOpen(false)}>
                 <Button variant="pill" className="w-full">Start Selling</Button>
               </Link>
