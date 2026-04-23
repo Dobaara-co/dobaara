@@ -21,8 +21,9 @@ import {
   SketchBagIcon,
   SketchTagIcon,
   SketchDropletIcon,
-  SketchLeafIcon,
-  SketchHomeHeartIcon,
+  SketchGlobeLeafIcon,
+  SketchHandNeedleIcon,
+  SketchDressHangerIcon,
 } from "@/components/CategoryIcons";
 
 const categories = [
@@ -35,9 +36,30 @@ const categories = [
 const taraImages = [taraCream, taraBlush, taraTeal, taraBeige];
 
 const sustainabilityStats = [
-  { Icon: SketchDropletIcon, value: "85%", label: "less water vs making new" },
-  { Icon: SketchLeafIcon, value: "120kg", label: "CO₂ saved per lehenga" },
-  { Icon: SketchHomeHeartIcon, value: "1,200+", label: "outfits rehomed" },
+  {
+    Icon: SketchGlobeLeafIcon,
+    headline: "Up to 30%",
+    label: "Less environmental impact",
+    body: "Extending the life of an outfit significantly reduces its environmental footprint.",
+  },
+  {
+    Icon: SketchDropletIcon,
+    headline: "2,700 litres",
+    label: "Of water",
+    body: "That's what it can take to produce a single garment.",
+  },
+  {
+    Icon: SketchHandNeedleIcon,
+    headline: "Weeks of craftsmanship",
+    label: "Time, skill & heritage",
+    body: "Many pieces are hand-finished and made to be worn more than once.",
+  },
+  {
+    Icon: SketchDressHangerIcon,
+    headline: "Worn once or twice",
+    label: "Too good to waste",
+    body: "Most occasion outfits spend their life sitting in storage.",
+  },
 ];
 
 const Index = () => {

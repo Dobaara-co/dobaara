@@ -244,3 +244,52 @@ export const SketchHomeHeartIcon = (props: IconProps) => (
     <path d="M32 46s-8-5-8-12a5 5 0 018-3 5 5 0 018 3c0 7-8 12-8 12z" />
   </svg>
 );
+
+// Globe with leaf — environmental impact
+export const SketchGlobeLeafIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <circle cx="32" cy="32" r="20" />
+    <path d="M12 32h40" />
+    <path d="M32 12c6 6 9 13 9 20s-3 14-9 20c-6-6-9-13-9-20s3-14 9-20z" />
+    {/* leaf overlay */}
+    <path d="M40 24c-6 0-10 4-10 10 6 0 10-4 10-10z" fill="hsl(var(--background))" />
+    <path d="M40 24c-6 0-10 4-10 10 6 0 10-4 10-10z" />
+    <path d="M30 34l8-8" />
+  </svg>
+);
+
+// Hand stitching with needle — craftsmanship
+export const SketchHandNeedleIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    {/* needle */}
+    <path d="M14 14l18 18" />
+    <circle cx="13" cy="13" r="1.5" />
+    <path d="M30 30l4 4" />
+    {/* hand / fingers */}
+    <path d="M34 34c2-1 5-1 7 1l8 8c2 2 2 5 0 7s-5 2-7 0l-3-3" />
+    <path d="M38 38l-2 6" />
+    <path d="M42 40l-1 8" />
+    <path d="M46 42l1 8" />
+    {/* thread */}
+    <path d="M14 14c-2 4-2 8 2 10" opacity=".5" strokeDasharray="1 2" />
+  </svg>
+);
+
+// Dress on hanger — worn once or twice
+export const SketchDressHangerIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    {/* hanger hook */}
+    <path d="M32 8a3 3 0 013 3c0 2-2 3-3 4" />
+    {/* hanger bar */}
+    <path d="M32 15l-18 9h36z" />
+    {/* dress shoulders */}
+    <path d="M22 24c1 3 4 5 10 5s9-2 10-5" />
+    {/* dress flare */}
+    <path d="M22 24c-3 8-6 18-8 30h36c-2-12-5-22-8-30" />
+    {/* hem ruffle */}
+    <path d="M14 54c2-2 4-2 5 0s4 2 5 0 4-2 5 0 4 2 5 0 4-2 5 0 4 2 5 0" opacity=".7" />
+    {/* waist */}
+    <path d="M26 34h12" opacity=".5" />
+  </svg>
+);
+
