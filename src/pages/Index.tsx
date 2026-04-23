@@ -240,21 +240,114 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Sustainability stats */}
-      <section className="border-y border-border bg-card py-10">
-        <div className="container">
-          <p className="text-center font-mono text-xs tracking-[0.2em] text-muted-foreground mb-6">
-            EVERY RESALE MATTERS
-          </p>
-          <div className="flex flex-wrap items-start justify-center gap-10 md:gap-20 text-center">
+      {/* Sustainability — A second life makes a real difference */}
+      <section className="relative overflow-hidden border-y border-border bg-[hsl(var(--cream))] py-16 md:py-20">
+        {/* Decorative botanical corners */}
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 left-0 h-40 w-40 text-gold/30 md:h-56 md:w-56"
+          viewBox="0 0 200 200"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeLinecap="round"
+        >
+          <path d="M10 10c20 10 40 30 50 60" />
+          <path d="M30 10c5 15 5 30 0 45" opacity=".6" />
+          <path d="M60 20c10 5 18 15 22 30" opacity=".7" />
+          <path d="M20 40c10-2 22 0 32 8" opacity=".6" />
+          <circle cx="50" cy="80" r="6" opacity=".5" />
+          <path d="M44 80c2-4 8-6 12 0" opacity=".5" />
+          <path d="M50 74v12M44 80h12" opacity=".4" />
+        </svg>
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 right-0 h-40 w-40 -scale-x-100 text-gold/30 md:h-56 md:w-56"
+          viewBox="0 0 200 200"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeLinecap="round"
+        >
+          <path d="M10 10c20 10 40 30 50 60" />
+          <path d="M30 10c5 15 5 30 0 45" opacity=".6" />
+          <path d="M60 20c10 5 18 15 22 30" opacity=".7" />
+          <path d="M20 40c10-2 22 0 32 8" opacity=".6" />
+          <path d="M70 50c8 4 14 12 18 22" opacity=".5" />
+        </svg>
+
+        <div className="container relative">
+          {/* Heading */}
+          <div className="text-center max-w-2xl mx-auto mb-3">
+            <h2 className="font-display text-3xl md:text-5xl font-bold leading-tight tracking-tight text-primary">
+              A second life makes
+              <br />
+              <span className="italic font-medium text-gradient-gold">a real difference.</span>
+            </h2>
+            <div className="flex items-center justify-center gap-2 mt-4 mb-4 text-gold">
+              <span className="h-px w-10 bg-gold/50" />
+              <span className="text-xs">◆</span>
+              <span className="h-px w-10 bg-gold/50" />
+            </div>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+              South Asian outfits are crafted with time, skill and so many resources.
+              Wearing them again means less waste — and more stories carried forward.
+            </p>
+          </div>
+
+          {/* Stat cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mt-10">
             {sustainabilityStats.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center max-w-[180px]">
-                <stat.Icon className="h-7 w-7 text-gold mb-3" />
-                <p className="font-display text-3xl font-bold text-primary">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+              <div
+                key={stat.label}
+                className="flex flex-col items-center text-center rounded-2xl border border-gold/20 bg-card/60 backdrop-blur-sm p-6 shadow-sm"
+              >
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--gold-light))] mb-4">
+                  <stat.Icon className="h-8 w-8 text-primary" />
+                </div>
+                <p className="font-display text-xl md:text-2xl font-bold text-primary leading-tight">
+                  {stat.headline}
+                </p>
+                <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-gold mt-2">
+                  {stat.label}
+                </p>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                  {stat.body}
+                </p>
               </div>
             ))}
           </div>
+
+          {/* Bottom banner */}
+          <div className="relative overflow-hidden mt-10 rounded-2xl bg-[hsl(var(--gold-light))]/60 border border-gold/20 px-6 py-8 md:px-10 md:py-10 text-center">
+            <p className="text-sm md:text-base text-foreground/80">
+              Reselling keeps beautiful pieces in circulation — and out of landfill.
+            </p>
+            <p className="font-display italic text-lg md:text-xl text-gradient-gold mt-2">
+              Every outfit deserves more than one moment.
+            </p>
+            <p className="font-display font-bold text-base md:text-lg text-primary mt-1">
+              That's the dobaara way.
+            </p>
+          </div>
+
+          {/* Trust badges */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 md:gap-10 text-xs md:text-sm text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <SketchLockIcon className="h-4 w-4 text-primary" /> Secure Payments
+            </span>
+            <span className="flex items-center gap-2">
+              <SketchVerifiedIcon className="h-4 w-4 text-primary" /> Verified Sellers
+            </span>
+            <span className="flex items-center gap-2">
+              <SketchTruckIcon className="h-4 w-4 text-primary" /> Tracked Delivery
+            </span>
+          </div>
+
+          {/* Source credit */}
+          <p className="mt-5 text-center text-[11px] text-muted-foreground/70">
+            Sources: WRAP UK, UNEP, Ellen MacArthur Foundation
+          </p>
         </div>
       </section>
     </div>
