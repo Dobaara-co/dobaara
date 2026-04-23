@@ -280,11 +280,20 @@ export interface Database {
         }
       }
     }
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
       increment_listing_views: {
         Args: { p_listing_id: string }
         Returns: undefined
       }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
