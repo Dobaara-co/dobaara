@@ -67,6 +67,8 @@ export default {
         terracotta: {
           DEFAULT: "hsl(var(--terracotta))",
           foreground: "hsl(var(--terracotta-foreground))",
+          soft: "hsl(var(--terracotta-soft))",
+          "soft-foreground": "hsl(var(--terracotta-soft-foreground))",
         },
         mocha: {
           DEFAULT: "hsl(var(--mocha))",

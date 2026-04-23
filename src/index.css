@@ -58,6 +58,8 @@
     /* Warm condition / accent palette */
     --terracotta: 17 76% 40%;
     --terracotta-foreground: 36 50% 96%;
+    --terracotta-soft: 16 73% 66%;
+    --terracotta-soft-foreground: 0 0% 15%;
     --mocha: 30 24% 53%;
     --mocha-foreground: 36 50% 96%;
     --stone-warm: 30 12% 48%;

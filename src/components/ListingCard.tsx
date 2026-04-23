@@ -61,9 +61,9 @@ const ListingCard = ({ listing }: { listing: Listing }) => {
             />
           </button>
 
-          {/* Discount badge — terracotta */}
+          {/* Discount badge — soft peach terracotta (lighter than condition badge) */}
           {discount && discount > 20 && (
-            <div className="absolute bottom-2 left-2 rounded-full bg-terracotta px-2 py-0.5 text-xs font-semibold text-terracotta-foreground">
+            <div className="absolute bottom-2 left-2 rounded-full bg-terracotta-soft px-2 py-0.5 text-xs font-semibold text-terracotta-soft-foreground shadow-sm">
               Save {discount}%
             </div>
           )}
