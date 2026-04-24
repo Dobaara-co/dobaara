@@ -232,7 +232,11 @@ export interface Database {
           listing_id: string
           created_at?: string
         }
-        Update: never
+        Update: {
+          id?: string
+          user_id?: string
+          listing_id?: string
+        }
       }
       waitlist: {
         Row: {
@@ -247,7 +251,10 @@ export interface Database {
           name?: string | null
           created_at?: string
         }
-        Update: never
+        Update: {
+          email?: string
+          name?: string | null
+        }
       }
       vip_submissions: {
         Row: {
@@ -300,7 +307,12 @@ export interface Database {
           message: string
           created_at?: string
         }
-        Update: never
+        Update: {
+          name?: string
+          email?: string
+          subject?: string
+          message?: string
+        }
       }
     }
     Views: {
@@ -309,7 +321,7 @@ export interface Database {
     Functions: {
       increment_listing_views: {
         Args: { p_listing_id: string }
-        Returns: undefined
+        Returns: void
       }
     }
     Enums: {
