@@ -100,28 +100,17 @@ const About = () => {
         </div>
       </section>
 
-      {/* Meet the team */}
+      {/* Closing line */}
       <section className="container py-16 md:py-20">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-semibold text-primary mb-3">
-            Built with love
-          </h2>
-          <div className="flex items-center gap-3 justify-center my-6">
+          <div className="flex items-center gap-3 justify-center mb-6">
             <span className="h-px w-10 bg-gold/50" />
             <span className="text-gold text-sm">◆</span>
             <span className="h-px w-10 bg-gold/50" />
           </div>
-
-          <div className="flex flex-col items-center mt-6">
-            <div className="h-32 w-32 rounded-full bg-gradient-to-br from-[hsl(var(--gold-light))] to-secondary border border-gold/30 flex items-center justify-center mb-5">
-              <span className="font-display text-3xl text-primary">A&amp;K</span>
-            </div>
-            <p className="font-display text-xl font-semibold text-primary">Amit &amp; Kiran</p>
-            <p className="text-sm text-muted-foreground mt-1">Co-founders, Dobaara</p>
-            <p className="text-sm text-muted-foreground mt-4 max-w-md">
-              Based in the UK. Building for the community.
-            </p>
-          </div>
+          <p className="font-display italic text-2xl md:text-3xl text-primary leading-relaxed">
+            Built in the UK. For the community, by the community.
+          </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/browse">
