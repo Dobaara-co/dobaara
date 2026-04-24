@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase, sendEmail } from "@/lib/supabase";
 import { SketchVerifiedIcon } from "@/components/CategoryIcons";
 
 const SUBJECTS = [
@@ -109,12 +109,10 @@ const Contact = () => {
 
     // Fire-and-forget notification email — don't block the success state
     const notificationEmail = import.meta.env.VITE_RESEND_NOTIFICATION_EMAIL ?? "info@dobaara.co";
-    supabase.functions.invoke("send-email", {
-      body: {
-        to: notificationEmail,
-        subject: "New Dobaara contact form submission",
-        html: contactNotificationHtml(parsed.data),
-      },
+    sendEmail({
+      to: notificationEmail,
+      subject: "New Dobaara contact form submission",
+      html: contactNotificationHtml(parsed.data),
     });
 
     setSuccess(true);

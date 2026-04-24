@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/lib/supabase'
+import { supabase, sendEmail } from '@/lib/supabase'
 
 function welcomeEmailHtml(firstName: string) {
   return `
@@ -70,9 +70,7 @@ const Auth = () => {
         toast({ title: 'Check your email', description: 'We sent you a confirmation link.' })
         const firstName = email.split('@')[0].replace(/[^a-zA-Z]/g, '') || 'there'
         const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
-        supabase.functions.invoke('send-email', {
-          body: { to: email, subject: 'Welcome to Dobaara 🌸', html: welcomeEmailHtml(displayName) },
-        })
+        sendEmail({ to: email, subject: 'Welcome to Dobaara 🌸', html: welcomeEmailHtml(displayName) })
         return
       }
       navigate(from, { replace: true })

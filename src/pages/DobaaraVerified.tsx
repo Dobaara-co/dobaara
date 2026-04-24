@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase, sendEmail } from "@/lib/supabase";
 import verifiedBanner from "@/assets/dobaara-verified-banner.jpeg";
 import { SketchSparkle, SketchArrowRight, SketchVerifiedIcon } from "@/components/CategoryIcons";
 
@@ -168,12 +168,10 @@ const DobaaraVerified = () => {
     }
 
     const notificationEmail = import.meta.env.VITE_RESEND_NOTIFICATION_EMAIL ?? "info@dobaara.co";
-    supabase.functions.invoke("send-email", {
-      body: {
-        to: notificationEmail,
-        subject: `New Dobaara Verified submission — ${parsed.data.item_type}`,
-        html: vipNotificationHtml(parsed.data),
-      },
+    sendEmail({
+      to: notificationEmail,
+      subject: `New Dobaara Verified submission — ${parsed.data.item_type}`,
+      html: vipNotificationHtml(parsed.data),
     });
 
     setSuccess(true);

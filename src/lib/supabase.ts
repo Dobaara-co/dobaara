@@ -24,3 +24,21 @@ export function getListingImageUrl(path: string): string {
   const { data } = supabase.storage.from('listing-images').getPublicUrl(path)
   return data.publicUrl
 }
+
+/** Calls the send-email edge function directly via fetch */
+export async function sendEmail(payload: {
+  to: string
+  subject: string
+  html: string
+  from?: string
+}): Promise<void> {
+  const url = `${supabaseUrl}/functions/v1/send-email`
+  await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${supabaseAnonKey}`,
+    },
+    body: JSON.stringify(payload),
+  })
+}
