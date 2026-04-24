@@ -58,7 +58,7 @@ const About = () => {
           </h2>
           <div className="space-y-5 text-base md:text-lg text-foreground/85 leading-relaxed">
             <p>
-              Dobaara was founded by Amit and his wife, who noticed the same thing in their own
+              Dobaara was founded by a husband and wife who noticed the same thing in their own
               home — and in the homes of every family around them. A wedding lehenga worth £600,
               worn once, gathering dust. A sangeet outfit with nowhere to go. We built Dobaara
               because the community deserved better than Facebook groups and generic resale
