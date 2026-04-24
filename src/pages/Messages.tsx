@@ -10,8 +10,10 @@ import type { Message } from '@/types/database'
 
 type Thread = {
   otherId: string
+  otherProfile: unknown
   lastMessage: Message
   unreadCount: number
+  listing: unknown
 }
 
 const Messages = () => {
