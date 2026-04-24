@@ -103,21 +103,32 @@ const Contact = () => {
               <div>
                 <p className="font-mono text-xs tracking-[0.18em] uppercase text-gold mb-1">Email</p>
                 <a
-                  href="mailto:hello@dobaara.co"
+                  href="mailto:info@dobaara.co"
                   className="text-foreground hover:text-primary transition-colors"
                 >
-                  hello@dobaara.co
+                  info@dobaara.co
                 </a>
               </div>
               <div>
                 <p className="font-mono text-xs tracking-[0.18em] uppercase text-gold mb-1">Instagram</p>
                 <a
-                  href="https://instagram.com/dobaara"
+                  href="https://www.instagram.com/dobaara.co"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-primary transition-colors"
                 >
-                  @dobaara
+                  @dobaara.co
+                </a>
+              </div>
+              <div>
+                <p className="font-mono text-xs tracking-[0.18em] uppercase text-gold mb-1">TikTok</p>
+                <a
+                  href="https://www.tiktok.com/@dobaara.co"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground hover:text-primary transition-colors"
+                >
+                  @dobaara.co
                 </a>
               </div>
             </div>
