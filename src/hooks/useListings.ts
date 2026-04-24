@@ -139,7 +139,7 @@ export function useListing(id: string | undefined) {
         .eq('id', id!)
         .single()
       if (error) throw error
-      const row = data as ListingWithSeller
+      const row = data as unknown as ListingWithSeller
       return {
         listing: mapDbListingToFrontend(row),
         seller: mapDbProfileToSeller(row.profiles),

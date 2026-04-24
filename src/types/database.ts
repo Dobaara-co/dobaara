@@ -1,6 +1,9 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export interface Database {
+  __InternalSupabase: {
+    PostgrestVersion: '12'
+  }
   public: {
     Tables: {
       profiles: {
@@ -44,6 +47,7 @@ export interface Database {
           average_rating?: number
           updated_at?: string
         }
+        Relationships: []
       }
       listings: {
         Row: {
@@ -140,6 +144,7 @@ export interface Database {
           tags?: string[]
           updated_at?: string
         }
+        Relationships: []
       }
       orders: {
         Row: {
@@ -172,6 +177,7 @@ export interface Database {
           shipping_address?: Json | null
           updated_at?: string
         }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -195,6 +201,7 @@ export interface Database {
         Update: {
           is_read?: boolean
         }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -218,6 +225,7 @@ export interface Database {
         Update: {
           body?: string | null
         }
+        Relationships: []
       }
       saved_listings: {
         Row: {
@@ -232,7 +240,12 @@ export interface Database {
           listing_id: string
           created_at?: string
         }
-        Update: never
+        Update: {
+          id?: string
+          user_id?: string
+          listing_id?: string
+        }
+        Relationships: []
       }
       waitlist: {
         Row: {
@@ -247,7 +260,11 @@ export interface Database {
           name?: string | null
           created_at?: string
         }
-        Update: never
+        Update: {
+          email?: string
+          name?: string | null
+        }
+        Relationships: []
       }
       vip_submissions: {
         Row: {
@@ -282,6 +299,7 @@ export interface Database {
           status?: string
           updated_at?: string
         }
+        Relationships: []
       }
       contact_submissions: {
         Row: {
@@ -300,7 +318,13 @@ export interface Database {
           message: string
           created_at?: string
         }
-        Update: never
+        Update: {
+          name?: string
+          email?: string
+          subject?: string
+          message?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -309,7 +333,7 @@ export interface Database {
     Functions: {
       increment_listing_views: {
         Args: { p_listing_id: string }
-        Returns: undefined
+        Returns: void
       }
     }
     Enums: {
