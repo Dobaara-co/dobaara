@@ -49,6 +49,40 @@ const steps = [
   },
 ];
 
+function vipNotificationHtml(data: {
+  full_name: string;
+  email: string;
+  item_type: string;
+  designer_brand?: string;
+  estimated_value: number;
+  description?: string;
+}) {
+  const valueGbp = `£${data.estimated_value.toLocaleString("en-GB")}`;
+  return `
+    <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
+      <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">
+        <div style="background:#8B5E3C;padding:24px 32px">
+          <h1 style="margin:0;color:#fff;font-size:22px;letter-spacing:0.08em">DOBAARA</h1>
+          <p style="margin:4px 0 0;color:#f5e6d3;font-size:13px">New Dobaara Verified submission</p>
+        </div>
+        <div style="padding:28px 32px;color:#3d2b1f">
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600;width:140px">Full name</td><td style="padding:8px 0">${data.full_name}</td></tr>
+            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Email</td><td style="padding:8px 0"><a href="mailto:${data.email}" style="color:#8B5E3C">${data.email}</a></td></tr>
+            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Item type</td><td style="padding:8px 0">${data.item_type}</td></tr>
+            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Designer / brand</td><td style="padding:8px 0">${data.designer_brand ?? "—"}</td></tr>
+            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Estimated value</td><td style="padding:8px 0;font-weight:600">${valueGbp}</td></tr>
+            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600;vertical-align:top">Description</td><td style="padding:8px 0;white-space:pre-wrap">${data.description ?? "—"}</td></tr>
+          </table>
+        </div>
+        <div style="background:#f9f4ef;padding:16px 32px;font-size:12px;color:#999;border-top:1px solid #e8ddd0">
+          Dobaara · dobaara.co
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 const DobaaraVerified = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -132,6 +166,15 @@ const DobaaraVerified = () => {
       });
       return;
     }
+
+    const notificationEmail = import.meta.env.VITE_RESEND_NOTIFICATION_EMAIL ?? "info@dobaara.co";
+    supabase.functions.invoke("send-email", {
+      body: {
+        to: notificationEmail,
+        subject: `New Dobaara Verified submission — ${parsed.data.item_type}`,
+        html: vipNotificationHtml(parsed.data),
+      },
+    });
 
     setSuccess(true);
     setForm({

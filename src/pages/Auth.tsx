@@ -8,6 +8,39 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/lib/supabase'
+
+function welcomeEmailHtml(firstName: string) {
+  return `
+    <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
+      <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">
+        <div style="background:#8B5E3C;padding:32px;text-align:center">
+          <h1 style="margin:0;color:#fff;font-size:28px;letter-spacing:0.12em">DOBAARA</h1>
+          <p style="margin:8px 0 0;color:#C9A84C;font-size:13px;letter-spacing:0.1em">South Asian fashion, reimagined.</p>
+        </div>
+        <div style="padding:36px 32px;text-align:center;color:#3d2b1f">
+          <h2 style="margin:0 0 12px;font-size:22px;color:#8B5E3C">Welcome to Dobaara, ${firstName}!</h2>
+          <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#5a3e2b">
+            You've joined a community of South Asian fashion lovers giving beautiful outfits a second life.
+          </p>
+          <div style="display:inline-flex;gap:12px;margin-bottom:8px">
+            <a href="https://www.dobaara.co/browse"
+               style="display:inline-block;background:#8B5E3C;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600">
+              Browse listings
+            </a>
+            <a href="https://www.dobaara.co/sell"
+               style="display:inline-block;background:#C9A84C;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600">
+              List your first item
+            </a>
+          </div>
+        </div>
+        <div style="background:#f9f4ef;padding:16px 32px;font-size:12px;color:#999;text-align:center;border-top:1px solid #e8ddd0">
+          © 2025 Dobaara · <a href="https://dobaara.co" style="color:#8B5E3C;text-decoration:none">dobaara.co</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -35,6 +68,11 @@ const Auth = () => {
       } else {
         await signUpWithEmail(email, password)
         toast({ title: 'Check your email', description: 'We sent you a confirmation link.' })
+        const firstName = email.split('@')[0].replace(/[^a-zA-Z]/g, '') || 'there'
+        const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+        supabase.functions.invoke('send-email', {
+          body: { to: email, subject: 'Welcome to Dobaara 🌸', html: welcomeEmailHtml(displayName) },
+        })
         return
       }
       navigate(from, { replace: true })
