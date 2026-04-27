@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,7 +11,8 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, Package } from 'lucide-react'
+import { LogOut, Package, CheckCircle2, Loader2, CreditCard } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 const schema = z.object({
   full_name: z.string().min(1, 'Name is required'),
@@ -24,8 +25,10 @@ type FormValues = z.infer<typeof schema>
 const Account = () => {
   const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const [stripeLoading, setStripeLoading] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -37,9 +40,46 @@ const Account = () => {
     },
   })
 
+  // Handle return from Stripe onboarding
+  useEffect(() => {
+    const stripeParam = searchParams.get('stripe')
+    if (stripeParam === 'success') {
+      toast({ title: 'Payment setup complete!', description: 'You can now receive payouts from sales.' })
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    } else if (stripeParam === 'refresh') {
+      toast({
+        title: 'Payment setup incomplete',
+        description: 'Please complete your payment setup to start selling.',
+        variant: 'destructive',
+      })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!user || !profile) {
     navigate('/auth', { state: { from: '/account' } })
     return null
+  }
+
+  async function handleStripeOnboard() {
+    setStripeLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-connect-onboard', {
+        body: {
+          user_id: user!.id,
+          return_url: 'https://www.dobaara.co/account?stripe=success',
+          refresh_url: 'https://www.dobaara.co/account?stripe=refresh',
+        },
+      })
+      if (error || !data?.url) throw new Error(error?.message ?? 'Could not start onboarding')
+      window.location.href = data.url
+    } catch (err) {
+      toast({
+        title: 'Could not start payment setup',
+        description: err instanceof Error ? err.message : 'Please try again.',
+        variant: 'destructive',
+      })
+      setStripeLoading(false)
+    }
   }
 
   async function onSubmit(values: FormValues) {
@@ -105,6 +145,48 @@ const Account = () => {
         <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate('/sell')}>
           + List an item for sale
         </Button>
+      </div>
+
+      {/* Stripe payment setup */}
+      <div className="mb-8 p-4 rounded-lg border border-border bg-card">
+        <div className="flex items-center gap-2 mb-3">
+          <CreditCard className="h-4 w-4 text-primary" />
+          <span className="font-semibold text-sm">Seller Payments</span>
+        </div>
+        {profile.stripe_onboarding_complete ? (
+          <div>
+            <div className="flex items-center gap-2 text-sm text-success font-medium mb-1">
+              <CheckCircle2 className="h-4 w-4" /> Payments set up ✓
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your earnings will be paid out within 7 days of each sale.
+            </p>
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Connect your bank account to start receiving payments from sales.
+            </p>
+            {searchParams.get('stripe') === 'refresh' && (
+              <p className="text-xs text-destructive mb-2">
+                Your setup wasn't completed — please try again.
+              </p>
+            )}
+            <Button
+              variant="hero"
+              size="sm"
+              className="w-full"
+              onClick={handleStripeOnboard}
+              disabled={stripeLoading}
+            >
+              {stripeLoading ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirecting…</>
+              ) : (
+                'Set up payments'
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

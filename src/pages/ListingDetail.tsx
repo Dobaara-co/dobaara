@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share2, Award, Star, MapPin, Shield, Package, ArrowLeft } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, sendEmail } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -16,6 +17,7 @@ const ListingDetail = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const { data, isLoading, isError } = useListing(id);
   const { data: savedSet } = useSavedListings();
@@ -75,6 +77,30 @@ const ListingDetail = () => {
     if (!seller) return
     navigate('/messages')
     toast({ title: `Message ${seller.fullName}`, description: 'Open a conversation from the messages page.' })
+  }
+
+  async function handleBuyNow() {
+    if (!user) {
+      navigate('/auth', { state: { from: `/listing/${listing.id}` } })
+      return
+    }
+    setCheckoutLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-create-checkout', {
+        body: { listing_id: listing.id, buyer_id: user.id },
+      })
+      if (error || !data?.checkout_url) {
+        throw new Error(error?.message ?? 'Could not start checkout')
+      }
+      window.location.href = data.checkout_url
+    } catch (err) {
+      toast({
+        title: 'Checkout failed',
+        description: err instanceof Error ? err.message : 'Please try again.',
+        variant: 'destructive',
+      })
+      setCheckoutLoading(false)
+    }
   }
 
   const shareOnWhatsApp = () => {
@@ -199,9 +225,25 @@ const ListingDetail = () => {
 
           {/* Actions */}
           <div className="mt-6 flex flex-col gap-3">
-            <Button variant="hero" size="lg" className="w-full">
-              Buy Now — {formatPrice(listing.price + (listing.freePostage ? 0 : listing.postagePrice))}
-            </Button>
+            {seller?.stripeOnboardingComplete === false ? (
+              <p className="text-sm text-muted-foreground text-center py-3 px-4 rounded-lg bg-secondary">
+                This item is not available for purchase yet.
+              </p>
+            ) : (
+              <Button
+                variant="hero"
+                size="lg"
+                className="w-full"
+                onClick={handleBuyNow}
+                disabled={checkoutLoading || listing.isSold}
+              >
+                {checkoutLoading ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Preparing checkout…</>
+                ) : (
+                  <>Buy Now — {formatPrice(listing.price + (listing.freePostage ? 0 : listing.postagePrice))}</>
+                )}
+              </Button>
+            )}
             <div className="flex gap-3">
               <Button variant="heroOutline" size="lg" className="flex-1" onClick={handleMessageSeller}>
                 <MessageCircle className="h-4 w-4 mr-1" /> Make an Offer
@@ -225,7 +267,7 @@ const ListingDetail = () => {
           </div>
 
           <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Shield className="h-3.5 w-3.5" /> Secured by Stripe · Buyer protection included
+            <Shield className="h-3.5 w-3.5" /> Secure checkout powered by Stripe · Buyer protection included
           </div>
 
           {/* Seller card */}

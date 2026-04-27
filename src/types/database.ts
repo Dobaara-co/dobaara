@@ -18,6 +18,10 @@ export interface Database {
           is_vip_seller: boolean
           total_sales_count: number
           average_rating: number
+          stripe_account_id: string | null
+          stripe_onboarding_complete: boolean
+          stripe_charges_enabled: boolean
+          stripe_payouts_enabled: boolean
           created_at: string
           updated_at: string
         }
@@ -32,6 +36,10 @@ export interface Database {
           is_vip_seller?: boolean
           total_sales_count?: number
           average_rating?: number
+          stripe_account_id?: string | null
+          stripe_onboarding_complete?: boolean
+          stripe_charges_enabled?: boolean
+          stripe_payouts_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -45,6 +53,10 @@ export interface Database {
           is_vip_seller?: boolean
           total_sales_count?: number
           average_rating?: number
+          stripe_account_id?: string | null
+          stripe_onboarding_complete?: boolean
+          stripe_charges_enabled?: boolean
+          stripe_payouts_enabled?: boolean
           updated_at?: string
         }
         Relationships: []

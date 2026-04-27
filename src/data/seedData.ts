@@ -42,6 +42,7 @@ export interface Seller {
   isVipSeller: boolean;
   totalSalesCount: number;
   averageRating: number;
+  stripeOnboardingComplete?: boolean;
 }
 
 export const sellers: Seller[] = [

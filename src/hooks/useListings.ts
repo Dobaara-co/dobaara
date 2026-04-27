@@ -54,6 +54,7 @@ export function mapDbProfileToSeller(row: ListingWithSeller['profiles']): Seller
     isVipSeller: row.is_vip_seller,
     totalSalesCount: row.total_sales_count,
     averageRating: Number(row.average_rating),
+    stripeOnboardingComplete: row.stripe_onboarding_complete,
   }
 }
 
