@@ -10,6 +10,7 @@ import Index from "./pages/Index.tsx";
 import Browse from "./pages/Browse.tsx";
 import ListingDetail from "./pages/ListingDetail.tsx";
 import Auth from "./pages/Auth.tsx";
+import AuthConfirm from "./pages/AuthConfirm.tsx";
 import Account from "./pages/Account.tsx";
 import CreateListing from "./pages/CreateListing.tsx";
 import Messages from "./pages/Messages.tsx";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/browse" element={<Browse />} />
               <Route path="/listing/:id" element={<ListingDetail />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/confirm" element={<AuthConfirm />} />
               <Route path="/account" element={<Account />} />
               <Route path="/sell" element={<CreateListing />} />
               <Route path="/messages" element={<Messages />} />
