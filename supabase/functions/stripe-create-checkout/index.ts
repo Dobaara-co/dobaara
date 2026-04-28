@@ -68,13 +68,6 @@ serve(async (req) => {
       is_vip_seller: boolean;
     };
 
-    if (!seller?.stripe_account_id) {
-      return new Response(JSON.stringify({ error: "Seller has not completed payment setup" }), {
-        status: 422,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     // Commission calculation
     const postage = listing.free_postage ? 0 : (listing.postage_price ?? 0);
     const totalAmount = listing.price + postage;
@@ -104,6 +97,8 @@ serve(async (req) => {
       });
     }
 
+    const isTestMode = !seller.stripe_account_id || seller.stripe_account_id === "acct_test_placeholder";
+
     // Build Stripe Checkout params
     const params: Record<string, string> = {
       "payment_method_types[0]": "card",
@@ -112,8 +107,6 @@ serve(async (req) => {
       "line_items[0][price_data][product_data][name]": listing.title,
       "line_items[0][quantity]": "1",
       mode: "payment",
-      "payment_intent_data[application_fee_amount]": String(platformFee),
-      "payment_intent_data[transfer_data][destination]": seller.stripe_account_id,
       success_url: `https://www.dobaara.co/orders/${order.id}?success=true`,
       cancel_url: `https://www.dobaara.co/listing/${listing_id}`,
       "metadata[listing_id]": listing_id,
@@ -121,6 +114,13 @@ serve(async (req) => {
       "metadata[seller_id]": listing.seller_id,
       "metadata[order_id]": order.id,
     };
+
+    if (!isTestMode) {
+      params["payment_intent_data[application_fee_amount]"] = String(platformFee);
+      params["payment_intent_data[transfer_data][destination]"] = seller.stripe_account_id!;
+    } else {
+      // TEST MODE - no transfer
+    }
 
     // Add postage as a separate line item if applicable
     if (postage > 0) {
@@ -152,6 +152,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
+    console.error("[stripe-create-checkout] Unhandled error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

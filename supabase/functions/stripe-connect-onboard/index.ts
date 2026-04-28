@@ -24,12 +24,15 @@ async function stripePost(path: string, params: Record<string, string>) {
 }
 
 serve(async (req) => {
+  console.log("[stripe-connect-onboard] Request received:", req.method);
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
     const { user_id, return_url, refresh_url } = await req.json();
+    console.log("[stripe-connect-onboard] Parsed body — user_id:", user_id, "return_url:", return_url);
 
     if (!user_id || !return_url || !refresh_url) {
       return new Response(JSON.stringify({ error: "user_id, return_url, refresh_url required" }), {
@@ -47,6 +50,8 @@ serve(async (req) => {
       .eq("id", user_id)
       .single();
 
+    console.log("[stripe-connect-onboard] Profile lookup — error:", profileError, "stripe_account_id:", profile?.stripe_account_id ?? null);
+
     if (profileError) {
       return new Response(JSON.stringify({ error: "Profile not found" }), {
         status: 404,
@@ -55,7 +60,8 @@ serve(async (req) => {
     }
 
     // Fetch user email from auth
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(user_id);
+    const { data: authData, error: userError } = await supabase.auth.admin.getUserById(user_id);
+    const user = authData?.user;
     if (userError || !user?.email) {
       return new Response(JSON.stringify({ error: "User email not found" }), {
         status: 404,
@@ -66,6 +72,7 @@ serve(async (req) => {
     // Create Stripe account if seller doesn't have one yet
     let stripeAccountId = profile.stripe_account_id;
     if (!stripeAccountId) {
+      console.log("[stripe-connect-onboard] Creating Stripe account for email:", user.email);
       const account = await stripePost("/accounts", {
         type: "standard",
         country: "GB",
@@ -73,6 +80,8 @@ serve(async (req) => {
         "capabilities[card_payments][requested]": "true",
         "capabilities[transfers][requested]": "true",
       });
+
+      console.log("[stripe-connect-onboard] Stripe account response:", JSON.stringify(account));
 
       if (account.error) {
         return new Response(JSON.stringify({ error: account.error.message }), {
@@ -90,12 +99,15 @@ serve(async (req) => {
     }
 
     // Create Account Link for hosted onboarding
+    console.log("[stripe-connect-onboard] Creating account link for stripe_account_id:", stripeAccountId);
     const accountLink = await stripePost("/account_links", {
       account: stripeAccountId,
       return_url,
       refresh_url,
       type: "account_onboarding",
     });
+
+    console.log("[stripe-connect-onboard] Account link response:", JSON.stringify(accountLink));
 
     if (accountLink.error) {
       return new Response(JSON.stringify({ error: accountLink.error.message }), {
@@ -109,6 +121,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
+    console.error("[stripe-connect-onboard] Unhandled error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

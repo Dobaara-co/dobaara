@@ -93,113 +93,123 @@ function paymentFailedHtml(itemName: string): string {
 }
 
 serve(async (req) => {
-  const payload = await req.text();
-  const signature = req.headers.get("stripe-signature") ?? "";
+  console.log("[stripe-webhook] Request received:", req.method, req.url);
 
-  const valid = await verifyStripeSignature(payload, signature, STRIPE_WEBHOOK_SECRET);
-  if (!valid) {
-    return new Response("Invalid signature", { status: 400 });
-  }
+  try {
+    const payload = await req.text();
+    const signature = req.headers.get("stripe-signature") ?? "";
 
-  const event = JSON.parse(payload);
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    console.log("[stripe-webhook] Verifying signature, payload length:", payload.length);
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const { order_id, seller_id, listing_id } = session.metadata ?? {};
-
-    if (order_id) {
-      await supabase
-        .from("orders")
-        .update({
-          status: "payment_confirmed",
-          stripe_payment_intent_id: session.payment_intent,
-          stripe_charge_id: session.payment_intent,
-        })
-        .eq("id", order_id);
+    const valid = await verifyStripeSignature(payload, signature, STRIPE_WEBHOOK_SECRET);
+    if (!valid) {
+      console.error("[stripe-webhook] Invalid signature");
+      return new Response("Invalid signature", { status: 400 });
     }
 
-    if (listing_id) {
-      await supabase
-        .from("listings")
-        .update({ is_sold: true, is_active: false })
-        .eq("id", listing_id);
-    }
+    const event = JSON.parse(payload);
+    console.log("[stripe-webhook] Event type:", event.type, "id:", event.id);
 
-    // Email the seller
-    if (seller_id && order_id) {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const { order_id, seller_id, listing_id } = session.metadata ?? {};
+
+      if (order_id) {
+        await supabase
+          .from("orders")
+          .update({
+            status: "payment_confirmed",
+            stripe_payment_intent_id: session.payment_intent,
+            stripe_charge_id: session.payment_intent,
+          })
+          .eq("id", order_id);
+      }
+
+      if (listing_id) {
+        await supabase
+          .from("listings")
+          .update({ is_sold: true, is_active: false })
+          .eq("id", listing_id);
+      }
+
+      // Email the seller
+      if (seller_id && order_id) {
+        const { data: order } = await supabase
+          .from("orders")
+          .select("seller_payout_amount, amount, listings(title)")
+          .eq("id", order_id)
+          .single();
+
+        if (order) {
+          const { data: authData } = await supabase.auth.admin.getUserById(seller_id);
+          if (authData?.user?.email) {
+            const listing = order.listings as unknown as { title: string } | null;
+            await sendEmailNotification(
+              authData.user.email,
+              "You've made a sale on Dobaara! 🎉",
+              saleEmailHtml(
+                listing?.title ?? "Your item",
+                order.amount,
+                order.seller_payout_amount ?? 0,
+              ),
+            );
+          }
+        }
+      }
+    } else if (event.type === "payment_intent.payment_failed") {
+      const paymentIntent = event.data.object;
+
       const { data: order } = await supabase
         .from("orders")
-        .select("seller_payout_amount, amount, listings(title)")
-        .eq("id", order_id)
+        .select("id, buyer_id, listings(title)")
+        .eq("stripe_payment_intent_id", paymentIntent.id)
         .single();
 
-      const { data: sellerProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", seller_id)
-        .single();
+      if (order) {
+        await supabase
+          .from("orders")
+          .update({ status: "failed" })
+          .eq("id", order.id);
 
-      if (order && sellerProfile) {
-        const { data: { user } } = await supabase.auth.admin.getUserById(seller_id);
-        if (user?.email) {
+        const { data: authData } = await supabase.auth.admin.getUserById(order.buyer_id);
+        if (authData?.user?.email) {
           const listing = order.listings as unknown as { title: string } | null;
           await sendEmailNotification(
-            user.email,
-            "You've made a sale on Dobaara! 🎉",
-            saleEmailHtml(
-              listing?.title ?? "Your item",
-              order.amount,
-              order.seller_payout_amount ?? 0,
-            ),
+            authData.user.email,
+            "Your Dobaara payment failed",
+            paymentFailedHtml(listing?.title ?? "your item"),
           );
         }
       }
-    }
-  } else if (event.type === "payment_intent.payment_failed") {
-    const paymentIntent = event.data.object;
+    } else if (event.type === "account.updated") {
+      const account = event.data.object;
+      const stripeAccountId: string = account.id;
+      const chargesEnabled: boolean = account.charges_enabled;
+      const payoutsEnabled: boolean = account.payouts_enabled;
 
-    // Find the order by payment_intent_id
-    const { data: order } = await supabase
-      .from("orders")
-      .select("id, buyer_id, listings(title)")
-      .eq("stripe_payment_intent_id", paymentIntent.id)
-      .single();
-
-    if (order) {
       await supabase
-        .from("orders")
-        .update({ status: "failed" })
-        .eq("id", order.id);
-
-      const { data: { user } } = await supabase.auth.admin.getUserById(order.buyer_id);
-      if (user?.email) {
-        const listing = order.listings as unknown as { title: string } | null;
-        await sendEmailNotification(
-          user.email,
-          "Your Dobaara payment failed",
-          paymentFailedHtml(listing?.title ?? "your item"),
-        );
-      }
+        .from("profiles")
+        .update({
+          stripe_charges_enabled: chargesEnabled,
+          stripe_payouts_enabled: payoutsEnabled,
+          stripe_onboarding_complete: chargesEnabled,
+        })
+        .eq("stripe_account_id", stripeAccountId);
+    } else {
+      console.log("[stripe-webhook] Unhandled event type, ignoring:", event.type);
     }
-  } else if (event.type === "account.updated") {
-    const account = event.data.object;
-    const stripeAccountId: string = account.id;
-    const chargesEnabled: boolean = account.charges_enabled;
-    const payoutsEnabled: boolean = account.payouts_enabled;
 
-    await supabase
-      .from("profiles")
-      .update({
-        stripe_charges_enabled: chargesEnabled,
-        stripe_payouts_enabled: payoutsEnabled,
-        stripe_onboarding_complete: chargesEnabled,
-      })
-      .eq("stripe_account_id", stripeAccountId);
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error("[stripe-webhook] Unhandled error:", err);
+    return new Response(JSON.stringify({ error: String(err) }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-
-  return new Response(JSON.stringify({ received: true }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
 });
