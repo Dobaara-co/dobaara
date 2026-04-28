@@ -50,14 +50,14 @@ const steps = [
 ];
 
 function vipNotificationHtml(data: {
-  full_name: string;
-  email: string;
-  item_type: string;
+  full_name?: string;
+  email?: string;
+  item_type?: string;
   designer_brand?: string;
-  estimated_value: number;
+  estimated_value?: number;
   description?: string;
 }) {
-  const valueGbp = `£${data.estimated_value.toLocaleString("en-GB")}`;
+  const valueGbp = `£${(data.estimated_value ?? 0).toLocaleString("en-GB")}`;
   return `
     <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
       <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">

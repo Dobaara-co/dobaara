@@ -32,10 +32,10 @@ const contactSchema = z.object({
 });
 
 function contactNotificationHtml(data: {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
 }) {
   const timestamp = new Date().toLocaleString("en-GB", { timeZone: "Europe/London" });
   return `
