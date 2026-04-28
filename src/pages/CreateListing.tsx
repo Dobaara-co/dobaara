@@ -130,7 +130,14 @@ const CreateListing = () => {
     }
 
     queryClient.invalidateQueries({ queryKey: ['listings'] })
-    toast({ title: 'Listing live!', description: 'Your item is now on Dobaara.' })
+
+    // Fire-and-forget virtual try-on generation — don't block navigation
+    supabase.functions.invoke('generate-tryon', { body: { listing_id: data.id } })
+
+    toast({
+      title: 'Listing live!',
+      description: 'Your item is now on Dobaara. A virtual try-on is being generated.',
+    })
     navigate(`/listing/${data.id}`)
   }
 
