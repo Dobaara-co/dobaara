@@ -14,6 +14,7 @@ import AuthConfirm from "./pages/AuthConfirm.tsx";
 import Account from "./pages/Account.tsx";
 import CreateListing from "./pages/CreateListing.tsx";
 import Messages from "./pages/Messages.tsx";
+import OrderConfirmation from "./pages/OrderConfirmation.tsx";
 import About from "./pages/About.tsx";
 import HowItWorks from "./pages/HowItWorks.tsx";
 import DobaaraVerified from "./pages/DobaaraVerified.tsx";
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/account" element={<Account />} />
               <Route path="/sell" element={<CreateListing />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/orders/:orderId" element={<OrderConfirmation />} />
               <Route path="/about" element={<About />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/dobaara-verified" element={<DobaaraVerified />} />
