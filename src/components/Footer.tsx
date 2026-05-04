@@ -11,6 +11,8 @@ const columns: { title: string; links: FooterLink[] }[] = [
       { label: "Press", to: "#" },
       { label: "Contact", to: "/contact" },
       { label: "Accessibility", to: "#" },
+      { label: "Privacy Policy", to: "/privacy" },
+      { label: "Terms & Conditions", to: "/terms" },
     ],
   },
   {
@@ -30,6 +32,8 @@ const columns: { title: string; links: FooterLink[] }[] = [
       { label: "Selling", to: "/selling-guide" },
       { label: "Buying", to: "/how-it-works" },
       { label: "Trust and Safety", to: "/faq" },
+      { label: "Returns & Refunds", to: "/returns" },
+      { label: "Delivery Information", to: "/delivery" },
     ],
   },
 ];
@@ -66,8 +70,18 @@ const Footer = () => (
         ))}
       </div>
 
-      <div className="mt-12 pt-6 border-t border-border text-xs text-muted-foreground">
-        © 2025 Dobaara. Made with love for the community.
+      <div className="mt-12 pt-6 border-t border-border text-xs text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span>© 2025 Dobaara Ltd</span>
+        <span>·</span>
+        <span>dobaara.co</span>
+        <span>·</span>
+        <Link to="/privacy" className="hover:text-foreground transition-colors">
+          Privacy Policy
+        </Link>
+        <span>·</span>
+        <Link to="/terms" className="hover:text-foreground transition-colors">
+          Terms & Conditions
+        </Link>
       </div>
     </div>
   </footer>
