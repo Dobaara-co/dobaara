@@ -22,6 +22,10 @@ import SellingGuide from "./pages/SellingGuide.tsx";
 import SizeGuide from "./pages/SizeGuide.tsx";
 import FAQ from "./pages/FAQ.tsx";
 import Contact from "./pages/Contact.tsx";
+import Privacy from "./pages/Privacy.tsx";
+import Terms from "./pages/Terms.tsx";
+import Returns from "./pages/Returns.tsx";
+import Delivery from "./pages/Delivery.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient({
@@ -56,6 +60,10 @@ const App = () => (
               <Route path="/size-guide" element={<SizeGuide />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/returns" element={<Returns />} />
+              <Route path="/delivery" element={<Delivery />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
