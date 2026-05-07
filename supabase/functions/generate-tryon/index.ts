@@ -5,7 +5,7 @@ const PIAPI_KEY = Deno.env.get("PIAPI_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-const TARA_IMAGE_PATH = "model/tara-reference.jpg";
+const TARA_IMAGE_URL = "https://i.ibb.co/ycxyhNvh/tara-white.png";
 const STORAGE_BUCKET = "listing-images";
 
 const corsHeaders = {
@@ -57,12 +57,7 @@ serve(async (req) => {
       });
     }
 
-    // Get Tara's public URL from storage
-    const { data: taraUrlData } = supabase.storage
-      .from(STORAGE_BUCKET)
-      .getPublicUrl(TARA_IMAGE_PATH);
-    const taraImageUrl = taraUrlData.publicUrl;
-    console.log("[generate-tryon] Tara image URL:", taraImageUrl);
+    console.log("[generate-tryon] Tara image URL:", TARA_IMAGE_URL);
     console.log("[generate-tryon] Garment image URL:", garmentImageUrl);
 
     // Mark as processing
@@ -83,9 +78,10 @@ serve(async (req) => {
         model: "kling",
         task_type: "ai_try_on",
         input: {
-          model_input: taraImageUrl,
+          model_input: TARA_IMAGE_URL,
           dress_input: garmentImageUrl,
           batch_size: 1,
+          prompt: "Full length South Asian lehenga choli, long maxi skirt reaching the floor, separate crop blouse top, dupatta scarf draped over left shoulder, traditional Indian bridal occasion wear, ankle length or floor length skirt, do not shorten the skirt",
         },
       }),
     });
