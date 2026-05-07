@@ -11,6 +11,7 @@ interface AuthContextValue {
   signInWithEmail: (email: string, password: string) => Promise<void>
   signUpWithEmail: (email: string, password: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
+  signInWithApple: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -65,7 +66,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signInWithGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/account` },
+      options: { redirectTo: 'https://www.dobaara.co/auth/callback' },
+    })
+    if (error) throw error
+  }
+
+  async function signInWithApple() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: 'https://www.dobaara.co/auth/callback' },
     })
     if (error) throw error
   }
@@ -76,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, signOut }}>
       {children}
     </AuthContext.Provider>
   )

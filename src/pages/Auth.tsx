@@ -50,7 +50,7 @@ type FormValues = z.infer<typeof schema>
 
 const Auth = () => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth()
+  const { signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const { toast } = useToast()
@@ -95,6 +95,18 @@ const Auth = () => {
     }
   }
 
+  async function handleApple() {
+    try {
+      await signInWithApple()
+    } catch (err: unknown) {
+      toast({
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Something went wrong',
+        variant: 'destructive',
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -108,6 +120,18 @@ const Auth = () => {
               : 'Create your account to buy and sell'}
           </p>
         </div>
+
+        <Button
+          className="w-full mb-3 text-white"
+          style={{ backgroundColor: '#000', borderColor: '#000' }}
+          type="button"
+          onClick={handleApple}
+        >
+          <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.43c1.39.07 2.36.74 3.18.73.83-.01 2.38-.9 4.01-.77 1.54.13 2.69.72 3.45 1.81-3.06 1.83-2.48 5.85.36 7.08zm-3.23-13.4c-2.02.25-3.69-1.49-3.45-3.46 1.72-.14 3.42 1.45 3.45 3.46z"/>
+          </svg>
+          Continue with Apple
+        </Button>
 
         <Button
           variant="outline"
