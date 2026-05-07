@@ -23,7 +23,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 const Account = () => {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, loading, signOut } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
@@ -55,9 +55,28 @@ const Account = () => {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!user || !profile) {
-    navigate('/auth', { state: { from: '/account' } })
-    return null
+  // Redirect to /auth only once we know auth state has finished loading
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth', { replace: true, state: { from: '/account' } })
+    }
+  }, [loading, user, navigate])
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  // User exists but profile row not yet loaded (or missing)
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   async function handleStripeOnboard() {
