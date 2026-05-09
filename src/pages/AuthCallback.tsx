@@ -2,18 +2,29 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 
-const AuthCallback = () => {
+export default function AuthCallback() {
   const navigate = useNavigate()
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error || !session) {
-        setError(true)
-        return
+    async function handleCallback() {
+      try {
+        const url = window.location.href
+        const hasCode = new URL(url).searchParams.get('code')
+        if (hasCode) {
+          const { error } = await supabase.auth.exchangeCodeForSession(url)
+          if (error) throw error
+        }
+        const { data, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) throw sessionError
+        if (!data.session) throw new Error('No session established')
+        navigate('/account', { replace: true })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Authentication failed'
+        setError(message)
       }
-      navigate('/account', { replace: true })
-    })
+    }
+    handleCallback()
   }, [navigate])
 
   if (error) {
@@ -21,7 +32,7 @@ const AuthCallback = () => {
       <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#FAF7F2' }}>
         <div className="text-center">
           <h1 className="text-2xl font-bold font-display mb-2" style={{ color: '#8B5E3C' }}>Sign in failed</h1>
-          <p className="text-sm text-muted-foreground mb-6">Something went wrong during sign in.</p>
+          <p className="text-sm text-muted-foreground mb-6">{error}</p>
           <a href="/auth" className="text-sm font-medium underline" style={{ color: '#8B5E3C' }}>
             Back to sign in
           </a>
@@ -50,5 +61,3 @@ const AuthCallback = () => {
     </div>
   )
 }
-
-export default AuthCallback
