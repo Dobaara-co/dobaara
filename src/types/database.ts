@@ -92,6 +92,11 @@ export interface Database {
           ships_from: string | null
           ships_to: string[]
           tags: string[]
+          tryon_status: 'pending' | 'processing' | 'completed' | 'failed' | null
+          tryon_image_url: string | null
+          tryon_task_id: string | null
+          tryon_error: string | null
+          tryon_cost_pence: number | null
           created_at: string
           updated_at: string
         }
@@ -313,6 +318,57 @@ export interface Database {
         }
         Relationships: []
       }
+      virtual_models: {
+        Row: {
+          id: string
+          name: string
+          height: string
+          size_range: string
+          reference_image_url: string | null
+          display_order: number
+          is_default: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          height: string
+          size_range: string
+          reference_image_url?: string | null
+          display_order?: number
+          is_default?: boolean
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          height?: string
+          size_range?: string
+          reference_image_url?: string | null
+          display_order?: number
+          is_default?: boolean
+        }
+        Relationships: []
+      }
+      listing_tryons: {
+        Row: {
+          id: string
+          listing_id: string
+          model_id: string
+          tryon_image_url: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          model_id: string
+          tryon_image_url: string
+          created_at?: string
+        }
+        Update: {
+          tryon_image_url?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           id: string
@@ -369,6 +425,9 @@ export type Review = Tables<'reviews'>
 export type SavedListing = Tables<'saved_listings'>
 export type WaitlistEntry = Tables<'waitlist'>
 export type VipSubmission = Tables<'vip_submissions'>
+
+export type VirtualModel = Tables<'virtual_models'>
+export type ListingTryon = Tables<'listing_tryons'>
 
 // Listing with seller profile joined
 export type ListingWithSeller = Listing & {

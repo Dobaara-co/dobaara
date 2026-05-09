@@ -38,6 +38,8 @@ export function mapDbListingToFrontend(row: DBListing): Listing {
     shipsTo: row.ships_to,
     tags: row.tags,
     createdAt: row.created_at,
+    tryonStatus: row.tryon_status ?? null,
+    tryonImageUrl: row.tryon_image_url ?? null,
   }
 }
 

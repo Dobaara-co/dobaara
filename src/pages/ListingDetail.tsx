@@ -9,7 +9,8 @@ import { useState, useEffect } from "react";
 import { supabase, sendEmail } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
+import ModelSelector from "@/components/ModelSelector";
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -18,8 +19,9 @@ const ListingDetail = () => {
   const { toast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [tryonHeroUrl, setTryonHeroUrl] = useState<string | null>(null);
 
-  const { data, isLoading, isError } = useListing(id);
+  const { data, isLoading, isError, refetch } = useListing(id);
   const { data: savedSet } = useSavedListings();
   const toggleSave = useToggleSave();
 
@@ -33,6 +35,20 @@ const ListingDetail = () => {
       supabase.rpc('increment_listing_views', { p_listing_id: id }).then(() => {})
     }
   }, [id])
+
+  // Seed tryonHeroUrl from DB once the listing loads
+  useEffect(() => {
+    if (data?.listing?.tryonImageUrl) {
+      setTryonHeroUrl(data.listing.tryonImageUrl)
+    }
+  }, [data?.listing?.tryonImageUrl])
+
+  // Auto-refetch every 10 s while a try-on is being generated
+  useEffect(() => {
+    if (data?.listing?.tryonStatus !== 'processing') return
+    const timer = setInterval(() => { refetch() }, 10_000)
+    return () => clearInterval(timer)
+  }, [data?.listing?.tryonStatus, refetch])
 
   if (isLoading) {
     return (
@@ -118,7 +134,13 @@ const ListingDetail = () => {
         {/* Images */}
         <div>
           <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-muted">
-            {listing.images.length > 0 ? (
+            {tryonHeroUrl ? (
+              <img
+                src={tryonHeroUrl}
+                alt={`${listing.title} — virtual try-on`}
+                className="h-full w-full object-cover"
+              />
+            ) : listing.images.length > 0 ? (
               <img
                 src={listing.images[selectedImage]}
                 alt={listing.title}
@@ -127,20 +149,47 @@ const ListingDetail = () => {
             ) : (
               <div className="h-full w-full flex items-center justify-center text-muted-foreground">No image</div>
             )}
+
             {listing.isVipVerified && (
               <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-gold px-3 py-1.5 text-sm font-semibold text-accent-foreground shadow">
                 <Award className="h-4 w-4" /> Dobaara Verified
               </div>
             )}
+
+            {/* Try-on badge */}
+            {tryonHeroUrl && (
+              <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
+                <Sparkles className="h-3 w-3" /> Virtual Try-On
+              </div>
+            )}
+            {listing.tryonStatus === 'processing' && !tryonHeroUrl && (
+              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
+                <Loader2 className="h-3 w-3 animate-spin" /> Generating try-on…
+              </div>
+            )}
           </div>
-          {listing.images.length > 1 && (
+
+          {/* Original listing photos as thumbnails */}
+          {listing.images.length > 0 && (
             <div className="mt-3 flex gap-2 overflow-x-auto">
+              {/* Try-on thumbnail */}
+              {tryonHeroUrl && (
+                <button
+                  onClick={() => setTryonHeroUrl(tryonHeroUrl)}
+                  className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 border-primary"
+                >
+                  <img src={tryonHeroUrl} alt="Try-on" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 flex items-end justify-center pb-0.5">
+                    <Sparkles className="h-2.5 w-2.5 text-white drop-shadow" />
+                  </div>
+                </button>
+              )}
               {listing.images.map((img, i) => (
                 <button
                   key={i}
-                  onClick={() => setSelectedImage(i)}
+                  onClick={() => { setSelectedImage(i); setTryonHeroUrl(null) }}
                   className={`h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
-                    i === selectedImage ? "border-primary" : "border-border"
+                    !tryonHeroUrl && i === selectedImage ? "border-primary" : "border-border"
                   }`}
                 >
                   <img src={img} alt="" className="h-full w-full object-cover" />
@@ -148,6 +197,15 @@ const ListingDetail = () => {
               ))}
             </div>
           )}
+
+          {/* Model selector — Phase 2 */}
+          <ModelSelector
+            listingId={listing.id}
+            onTryonChange={(url) => {
+              setTryonHeroUrl(url)
+              setSelectedImage(0)
+            }}
+          />
         </div>
 
         {/* Details */}

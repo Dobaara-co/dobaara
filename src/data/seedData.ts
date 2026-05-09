@@ -29,6 +29,8 @@ export interface Listing {
   shipsTo: string[];
   tags: string[];
   createdAt: string;
+  tryonStatus?: 'pending' | 'processing' | 'completed' | 'failed' | null;
+  tryonImageUrl?: string | null;
 }
 
 export interface Seller {
