@@ -56,8 +56,18 @@ const Waitlist = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!audience) return;
-    const trimmed = email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) || trimmed.length > 255) {
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
+    if (!trimmedFirst || trimmedFirst.length > 100) {
+      setErrorMsg("Please enter a valid first name.");
+      return;
+    }
+    if (!trimmedLast || trimmedLast.length > 100) {
+      setErrorMsg("Please enter a valid last name.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) || trimmedEmail.length > 255) {
       setErrorMsg("Please enter a valid email address.");
       return;
     }
@@ -65,7 +75,13 @@ const Waitlist = () => {
     setErrorMsg("");
     const { error } = await supabase
       .from("waitlist" as never)
-      .insert({ email: trimmed, type: audience } as never);
+      .insert({
+        email: trimmedEmail,
+        type: audience,
+        first_name: trimmedFirst,
+        last_name: trimmedLast,
+        name: `${trimmedFirst} ${trimmedLast}`,
+      } as never);
     if (error) {
       setStatus("error");
       setErrorMsg("Something went wrong. Please try again.");
