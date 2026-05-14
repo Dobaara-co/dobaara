@@ -148,6 +148,32 @@ const Waitlist = () => {
                   onSubmit={handleSubmit}
                   className="w-full flex flex-col gap-3 animate-in fade-in duration-300"
                 >
+                  <label htmlFor="waitlist-first-name" className="sr-only">
+                    First name
+                  </label>
+                  <input
+                    id="waitlist-first-name"
+                    type="text"
+                    required
+                    autoComplete="given-name"
+                    placeholder="First name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full rounded-md px-5 py-4 text-base bg-card/90 backdrop-blur border border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <label htmlFor="waitlist-last-name" className="sr-only">
+                    Last name
+                  </label>
+                  <input
+                    id="waitlist-last-name"
+                    type="text"
+                    required
+                    autoComplete="family-name"
+                    placeholder="Last name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full rounded-md px-5 py-4 text-base bg-card/90 backdrop-blur border border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
                   <label htmlFor="waitlist-email" className="sr-only">
                     Email address
                   </label>
