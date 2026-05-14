@@ -15,6 +15,8 @@ const COPY: Record<Audience, { success: string }> = {
 
 const Waitlist = () => {
   const [audience, setAudience] = useState<Audience | null>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -54,8 +56,18 @@ const Waitlist = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!audience) return;
-    const trimmed = email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) || trimmed.length > 255) {
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
+    if (!trimmedFirst || trimmedFirst.length > 100) {
+      setErrorMsg("Please enter a valid first name.");
+      return;
+    }
+    if (!trimmedLast || trimmedLast.length > 100) {
+      setErrorMsg("Please enter a valid last name.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) || trimmedEmail.length > 255) {
       setErrorMsg("Please enter a valid email address.");
       return;
     }
@@ -63,7 +75,13 @@ const Waitlist = () => {
     setErrorMsg("");
     const { error } = await supabase
       .from("waitlist" as never)
-      .insert({ email: trimmed, type: audience } as never);
+      .insert({
+        email: trimmedEmail,
+        type: audience,
+        first_name: trimmedFirst,
+        last_name: trimmedLast,
+        name: `${trimmedFirst} ${trimmedLast}`,
+      } as never);
     if (error) {
       setStatus("error");
       setErrorMsg("Something went wrong. Please try again.");
@@ -130,6 +148,32 @@ const Waitlist = () => {
                   onSubmit={handleSubmit}
                   className="w-full flex flex-col gap-3 animate-in fade-in duration-300"
                 >
+                  <label htmlFor="waitlist-first-name" className="sr-only">
+                    First name
+                  </label>
+                  <input
+                    id="waitlist-first-name"
+                    type="text"
+                    required
+                    autoComplete="given-name"
+                    placeholder="First name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full rounded-md px-5 py-4 text-base bg-card/90 backdrop-blur border border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <label htmlFor="waitlist-last-name" className="sr-only">
+                    Last name
+                  </label>
+                  <input
+                    id="waitlist-last-name"
+                    type="text"
+                    required
+                    autoComplete="family-name"
+                    placeholder="Last name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full rounded-md px-5 py-4 text-base bg-card/90 backdrop-blur border border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
                   <label htmlFor="waitlist-email" className="sr-only">
                     Email address
                   </label>
