@@ -14,6 +14,7 @@ const COPY: Record<Audience, { success: string }> = {
 };
 
 const Waitlist = () => {
+  const [audience, setAudience] = useState<Audience | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
