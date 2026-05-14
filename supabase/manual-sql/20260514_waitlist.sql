@@ -8,6 +8,12 @@ CREATE TABLE IF NOT EXISTS public.waitlist (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Add name columns (safe if table already exists)
+ALTER TABLE public.waitlist
+  ADD COLUMN IF NOT EXISTS first_name text,
+  ADD COLUMN IF NOT EXISTS last_name text,
+  ADD COLUMN IF NOT EXISTS name text;
+
 ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Anyone can join waitlist" ON public.waitlist;
