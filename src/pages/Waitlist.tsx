@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import heroBg from "@/assets/hero-bg.jpg";
 
-type AudienceType = "buyer" | "seller" | "both";
+type AudienceType = "buyer" | "seller";
 
 const COPY: Record<AudienceType, { success: string }> = {
   buyer: { success: "You're on the list. We'll be in touch soon." },
@@ -11,21 +11,16 @@ const COPY: Record<AudienceType, { success: string }> = {
     success:
       "You're on the list. We'll reach out with everything you need to start selling.",
   },
-  both: {
-    success:
-      "You're on the list. We'll be in touch with everything you need.",
-  },
 };
 
 const Waitlist = () => {
-  const [wantsToBuy, setWantsToBuy] = useState(false);
-  const [wantsToSell, setWantsToSell] = useState(false);
+  const [audience, setAudience] = useState<AudienceType | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [audienceType, setAudienceType] = useState<AudienceType | null>(null);
+  const [submittedType, setSubmittedType] = useState<AudienceType | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const hasScrolledRef = useRef(false);
 
@@ -51,7 +46,7 @@ const Waitlist = () => {
     };
   }, []);
 
-  const anySelected = wantsToBuy || wantsToSell;
+  const anySelected = audience !== null;
 
   useEffect(() => {
     if (anySelected && !hasScrolledRef.current) {
@@ -65,30 +60,22 @@ const Waitlist = () => {
     }
   }, [anySelected]);
 
-  const toggleBuy = () => {
-    setWantsToBuy((prev) => !prev);
+  const selectBuy = () => {
+    setAudience("buyer");
     setStatus("idle");
     setErrorMsg("");
   };
 
-  const toggleSell = () => {
-    setWantsToSell((prev) => !prev);
+  const selectSell = () => {
+    setAudience("seller");
     setStatus("idle");
     setErrorMsg("");
-  };
-
-  const getAudienceType = (): AudienceType | null => {
-    if (wantsToBuy && wantsToSell) return "both";
-    if (wantsToBuy) return "buyer";
-    if (wantsToSell) return "seller";
-    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const type = getAudienceType();
-    if (!type) {
-      setErrorMsg("Please select at least one option.");
+    if (!audience) {
+      setErrorMsg("Please select an option.");
       return;
     }
     const trimmedEmail = email.trim().toLowerCase();
@@ -111,7 +98,7 @@ const Waitlist = () => {
 
     const payload = {
       email: trimmedEmail,
-      type,
+      type: audience,
       first_name: trimmedFirst,
       last_name: trimmedLast,
       name: `${trimmedFirst} ${trimmedLast}`,
@@ -129,14 +116,13 @@ const Waitlist = () => {
       setErrorMsg("Something went wrong. Please try again.");
       return;
     }
-    setAudienceType(type);
+    setSubmittedType(audience);
     setStatus("done");
   };
 
   const joiningAsLabel = () => {
-    if (wantsToBuy && wantsToSell) return "Joining as both a buyer and a seller.";
-    if (wantsToBuy) return "Joining as a buyer.";
-    if (wantsToSell) return "Joining as a seller.";
+    if (audience === "buyer") return "Joining as a buyer.";
+    if (audience === "seller") return "Joining as a seller.";
     return "";
   };
 
@@ -175,18 +161,18 @@ const Waitlist = () => {
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
-                variant={wantsToBuy ? "hero" : "heroOutline"}
+                variant={audience === "buyer" ? "hero" : "heroOutline"}
                 size="lg"
                 className="font-bold"
-                onClick={toggleBuy}
+                onClick={selectBuy}
               >
                 I want to buy
               </Button>
               <Button
-                variant={wantsToSell ? "hero" : "heroOutline"}
+                variant={audience === "seller" ? "hero" : "heroOutline"}
                 size="lg"
                 className="font-bold"
-                onClick={toggleSell}
+                onClick={selectSell}
               >
                 I want to sell
               </Button>
@@ -256,10 +242,10 @@ const Waitlist = () => {
                 </form>
               )}
 
-              {status === "done" && audienceType && (
+              {status === "done" && submittedType && (
                 <div className="w-full text-center px-2 py-6 animate-in fade-in duration-500">
                   <p className="font-display text-xl sm:text-2xl leading-snug text-primary">
-                    {COPY[audienceType].success}
+                    {COPY[submittedType].success}
                   </p>
                   <div className="mx-auto mt-4 h-px w-12 bg-gold/60" />
                 </div>
