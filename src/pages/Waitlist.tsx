@@ -3,24 +3,31 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import heroBg from "@/assets/hero-bg.jpg";
 
-type Audience = "buyer" | "seller";
+type AudienceType = "buyer" | "seller" | "both";
 
-const COPY: Record<Audience, { success: string }> = {
+const COPY: Record<AudienceType, { success: string }> = {
   buyer: { success: "You're on the list. We'll be in touch soon." },
   seller: {
     success:
       "You're on the list. We'll reach out with everything you need to start selling.",
   },
+  both: {
+    success:
+      "You're on the list. We'll be in touch with everything you need.",
+  },
 };
 
 const Waitlist = () => {
-  const [audience, setAudience] = useState<Audience | null>(null);
+  const [wantsToBuy, setWantsToBuy] = useState(false);
+  const [wantsToSell, setWantsToSell] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [audienceType, setAudienceType] = useState<AudienceType | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const hasScrolledRef = useRef(false);
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -44,18 +51,46 @@ const Waitlist = () => {
     };
   }, []);
 
-  const openForm = (a: Audience) => {
-    setAudience(a);
+  const anySelected = wantsToBuy || wantsToSell;
+
+  useEffect(() => {
+    if (anySelected && !hasScrolledRef.current) {
+      hasScrolledRef.current = true;
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+    }
+    if (!anySelected) {
+      hasScrolledRef.current = false;
+    }
+  }, [anySelected]);
+
+  const toggleBuy = () => {
+    setWantsToBuy((prev) => !prev);
     setStatus("idle");
     setErrorMsg("");
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 50);
+  };
+
+  const toggleSell = () => {
+    setWantsToSell((prev) => !prev);
+    setStatus("idle");
+    setErrorMsg("");
+  };
+
+  const getAudienceType = (): AudienceType | null => {
+    if (wantsToBuy && wantsToSell) return "both";
+    if (wantsToBuy) return "buyer";
+    if (wantsToSell) return "seller";
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!audience) return;
+    const type = getAudienceType();
+    if (!type) {
+      setErrorMsg("Please select at least one option.");
+      return;
+    }
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedFirst = firstName.trim();
     const trimmedLast = lastName.trim();
@@ -73,21 +108,36 @@ const Waitlist = () => {
     }
     setStatus("submitting");
     setErrorMsg("");
+
+    const payload = {
+      email: trimmedEmail,
+      type,
+      first_name: trimmedFirst,
+      last_name: trimmedLast,
+      name: `${trimmedFirst} ${trimmedLast}`,
+    };
+
     const { error } = await supabase
       .from("waitlist" as never)
-      .insert({
-        email: trimmedEmail,
-        type: audience,
-        first_name: trimmedFirst,
-        last_name: trimmedLast,
-        name: `${trimmedFirst} ${trimmedLast}`,
-      } as never);
+      .upsert(payload as never, {
+        onConflict: "email",
+        ignoreDuplicates: false,
+      });
+
     if (error) {
       setStatus("error");
       setErrorMsg("Something went wrong. Please try again.");
       return;
     }
+    setAudienceType(type);
     setStatus("done");
+  };
+
+  const joiningAsLabel = () => {
+    if (wantsToBuy && wantsToSell) return "Joining as both a buyer and a seller.";
+    if (wantsToBuy) return "Joining as a buyer.";
+    if (wantsToSell) return "Joining as a seller.";
+    return "";
   };
 
   return (
@@ -125,25 +175,25 @@ const Waitlist = () => {
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
-                variant="hero"
+                variant={wantsToBuy ? "hero" : "heroOutline"}
                 size="lg"
-                className={`font-bold ${audience === "buyer" ? "ring-2 ring-primary ring-offset-2" : ""}`}
-                onClick={() => openForm("buyer")}
+                className="font-bold"
+                onClick={toggleBuy}
               >
                 I want to buy
               </Button>
               <Button
-                variant="heroOutline"
+                variant={wantsToSell ? "hero" : "heroOutline"}
                 size="lg"
-                className={`font-bold ${audience === "seller" ? "ring-2 ring-primary ring-offset-2" : ""}`}
-                onClick={() => openForm("seller")}
+                className="font-bold"
+                onClick={toggleSell}
               >
                 I want to sell
               </Button>
             </div>
 
             <div ref={formRef} className="w-full mt-8 max-w-md mx-auto">
-              {audience && status !== "done" && (
+              {anySelected && status !== "done" && (
                 <form
                   onSubmit={handleSubmit}
                   className="w-full flex flex-col gap-3 animate-in fade-in duration-300"
@@ -201,15 +251,15 @@ const Waitlist = () => {
                     <p className="text-sm text-center text-destructive">{errorMsg}</p>
                   )}
                   <p className="text-xs text-center text-muted-foreground">
-                    Joining as {audience === "buyer" ? "a buyer" : "a seller"}.
+                    {joiningAsLabel()}
                   </p>
                 </form>
               )}
 
-              {status === "done" && audience && (
+              {status === "done" && audienceType && (
                 <div className="w-full text-center px-2 py-6 animate-in fade-in duration-500">
                   <p className="font-display text-xl sm:text-2xl leading-snug text-primary">
-                    {COPY[audience].success}
+                    {COPY[audienceType].success}
                   </p>
                   <div className="mx-auto mt-4 h-px w-12 bg-gold/60" />
                 </div>
