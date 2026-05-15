@@ -3,17 +3,13 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import heroBg from "@/assets/hero-bg.jpg";
 
-type AudienceType = "buyer" | "seller" | "both";
+type AudienceType = "buyer" | "seller";
 
 const COPY: Record<AudienceType, { success: string }> = {
   buyer: { success: "You're on the list. We'll be in touch soon." },
   seller: {
     success:
       "You're on the list. We'll reach out with everything you need to start selling.",
-  },
-  both: {
-    success:
-      "You're on the list. We'll be in touch with everything you need.",
   },
 };
 
