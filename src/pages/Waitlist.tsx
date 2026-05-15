@@ -14,14 +14,13 @@ const COPY: Record<AudienceType, { success: string }> = {
 };
 
 const Waitlist = () => {
-  const [wantsToBuy, setWantsToBuy] = useState(false);
-  const [wantsToSell, setWantsToSell] = useState(false);
+  const [audience, setAudience] = useState<AudienceType | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const [audienceType, setAudienceType] = useState<AudienceType | null>(null);
+  const [submittedType, setSubmittedType] = useState<AudienceType | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const hasScrolledRef = useRef(false);
 
@@ -47,7 +46,7 @@ const Waitlist = () => {
     };
   }, []);
 
-  const anySelected = wantsToBuy || wantsToSell;
+  const anySelected = audience !== null;
 
   useEffect(() => {
     if (anySelected && !hasScrolledRef.current) {
@@ -61,30 +60,22 @@ const Waitlist = () => {
     }
   }, [anySelected]);
 
-  const toggleBuy = () => {
-    setWantsToBuy((prev) => !prev);
+  const selectBuy = () => {
+    setAudience("buyer");
     setStatus("idle");
     setErrorMsg("");
   };
 
-  const toggleSell = () => {
-    setWantsToSell((prev) => !prev);
+  const selectSell = () => {
+    setAudience("seller");
     setStatus("idle");
     setErrorMsg("");
-  };
-
-  const getAudienceType = (): AudienceType | null => {
-    if (wantsToBuy && wantsToSell) return "both";
-    if (wantsToBuy) return "buyer";
-    if (wantsToSell) return "seller";
-    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const type = getAudienceType();
-    if (!type) {
-      setErrorMsg("Please select at least one option.");
+    if (!audience) {
+      setErrorMsg("Please select an option.");
       return;
     }
     const trimmedEmail = email.trim().toLowerCase();
@@ -107,7 +98,7 @@ const Waitlist = () => {
 
     const payload = {
       email: trimmedEmail,
-      type,
+      type: audience,
       first_name: trimmedFirst,
       last_name: trimmedLast,
       name: `${trimmedFirst} ${trimmedLast}`,
@@ -125,14 +116,13 @@ const Waitlist = () => {
       setErrorMsg("Something went wrong. Please try again.");
       return;
     }
-    setAudienceType(type);
+    setSubmittedType(audience);
     setStatus("done");
   };
 
   const joiningAsLabel = () => {
-    if (wantsToBuy && wantsToSell) return "Joining as both a buyer and a seller.";
-    if (wantsToBuy) return "Joining as a buyer.";
-    if (wantsToSell) return "Joining as a seller.";
+    if (audience === "buyer") return "Joining as a buyer.";
+    if (audience === "seller") return "Joining as a seller.";
     return "";
   };
 
