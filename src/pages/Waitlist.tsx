@@ -161,18 +161,18 @@ const Waitlist = () => {
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
-                variant={wantsToBuy ? "hero" : "heroOutline"}
+                variant={audience === "buyer" ? "hero" : "heroOutline"}
                 size="lg"
                 className="font-bold"
-                onClick={toggleBuy}
+                onClick={selectBuy}
               >
                 I want to buy
               </Button>
               <Button
-                variant={wantsToSell ? "hero" : "heroOutline"}
+                variant={audience === "seller" ? "hero" : "heroOutline"}
                 size="lg"
                 className="font-bold"
-                onClick={toggleSell}
+                onClick={selectSell}
               >
                 I want to sell
               </Button>
