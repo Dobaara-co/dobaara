@@ -242,10 +242,10 @@ const Waitlist = () => {
                 </form>
               )}
 
-              {status === "done" && audienceType && (
+              {status === "done" && submittedType && (
                 <div className="w-full text-center px-2 py-6 animate-in fade-in duration-500">
                   <p className="font-display text-xl sm:text-2xl leading-snug text-primary">
-                    {COPY[audienceType].success}
+                    {COPY[submittedType].success}
                   </p>
                   <div className="mx-auto mt-4 h-px w-12 bg-gold/60" />
                 </div>
