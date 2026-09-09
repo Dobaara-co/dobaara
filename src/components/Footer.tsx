@@ -7,10 +7,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
     title: "Dobaara",
     links: [
       { label: "About us", to: "/about" },
-      { label: "Sustainability", to: "/about" },
-      { label: "Press", to: "#" },
       { label: "Contact", to: "/contact" },
-      { label: "Accessibility", to: "#" },
       { label: "Privacy Policy", to: "/privacy" },
       { label: "Terms & Conditions", to: "/terms" },
     ],
@@ -19,7 +16,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
     title: "Discover",
     links: [
       { label: "How it works", to: "/how-it-works" },
-      { label: "Item Verification", to: "/dobaara-verified" },
+      { label: "Dobaara Verified", to: "/dobaara-verified" },
       { label: "Size Guide", to: "/size-guide" },
       { label: "Selling Guide", to: "/selling-guide" },
     ],
@@ -27,16 +24,13 @@ const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: "Help",
     links: [
-      { label: "Help Centre", to: "/faq" },
       { label: "FAQ", to: "/faq" },
-      { label: "Selling", to: "/selling-guide" },
-      { label: "Buying", to: "/how-it-works" },
-      { label: "Trust and Safety", to: "/faq" },
       { label: "Returns & Refunds", to: "/returns" },
       { label: "Delivery Information", to: "/delivery" },
     ],
   },
 ];
+
 
 const Footer = () => (
   <footer className="border-t border-border mt-16 pb-20 md:pb-0">
@@ -71,7 +65,7 @@ const Footer = () => (
       </div>
 
       <div className="mt-12 pt-6 border-t border-border text-xs text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span>© 2025 Dobaara Ltd</span>
+        <span>© 2026 Dobaara Ltd</span>
         <span>·</span>
         <span>dobaara.co</span>
         <span>·</span>

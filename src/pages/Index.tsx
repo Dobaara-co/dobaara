@@ -221,7 +221,7 @@ const Index = () => {
             <h3 className="font-display text-lg font-semibold mb-5 text-primary">Browse, buy, wear again.</h3>
             <div className="space-y-4">
               {[
-                { step: "1", title: "Browse thousands of pieces", desc: "From lehengas to sherwanis — every category covered." },
+                { step: "1", title: "Every category covered", desc: "From lehengas to sherwanis — every category covered." },
                 { step: "2", title: "Buy with confidence", desc: "Verified sellers, secure payments, tracked postage." },
                 { step: "3", title: "Wear it again", desc: "Beautiful outfits at a fraction of the original price." },
               ].map((item) => (

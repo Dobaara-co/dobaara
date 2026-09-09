@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles } from "lucide-react";
 import ModelSelector from "@/components/ModelSelector";
+import { usePageMeta } from "@/lib/seo";
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -49,6 +50,14 @@ const ListingDetail = () => {
     const timer = setInterval(() => { refetch() }, 10_000)
     return () => clearInterval(timer)
   }, [data?.listing?.tryonStatus, refetch])
+
+  usePageMeta({
+    title: data?.listing ? `${data.listing.title} — Dobaara` : undefined,
+    description: data?.listing?.description?.slice(0, 150),
+    image: data?.listing?.images?.[0],
+    url: data?.listing ? `https://www.dobaara.co/listing/${data.listing.id}` : undefined,
+  })
+
 
   if (isLoading) {
     return (
