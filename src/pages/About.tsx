@@ -100,8 +100,41 @@ const About = () => {
         </div>
       </section>
 
+      {/* Founder */}
+      <section className="container py-16 md:py-20">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-[220px_1fr] gap-8 md:gap-12 items-center">
+          <div className="mx-auto md:mx-0 h-48 w-48 rounded-full border border-gold/30 bg-[hsl(var(--gold-light))] flex items-center justify-center overflow-hidden">
+            <span className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground uppercase text-center px-4">
+              Founder photo
+            </span>
+          </div>
+          <div className="text-center md:text-left">
+            <p className="font-mono text-xs tracking-[0.2em] text-gold uppercase mb-3">Our founder</p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold text-primary mb-2">
+              Kiran Mandora
+            </h2>
+            <p className="font-mono text-xs tracking-[0.15em] text-muted-foreground uppercase mb-5">
+              Founder &amp; CEO, Dobaara
+            </p>
+            <div className="space-y-4 text-base text-foreground/85 leading-relaxed">
+              <p>
+                Kiran grew up between wedding seasons and wardrobes packed with outfits that
+                deserved more than one night out. After years of lending, borrowing and reselling
+                within her own circle, she started Dobaara to give that trusted, word-of-mouth
+                exchange a proper home online.
+              </p>
+              <p>
+                She leads Dobaara day to day, working alongside her husband on the technology
+                behind the platform.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Closing line */}
       <section className="container py-16 md:py-20">
+
         <div className="max-w-2xl mx-auto text-center">
           <div className="flex items-center gap-3 justify-center mb-6">
             <span className="h-px w-10 bg-gold/50" />
