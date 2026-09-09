@@ -65,7 +65,7 @@ const Footer = () => (
       </div>
 
       <div className="mt-12 pt-6 border-t border-border text-xs text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span>© 2025 Dobaara Ltd</span>
+        <span>© 2026 Dobaara Ltd</span>
         <span>·</span>
         <span>dobaara.co</span>
         <span>·</span>

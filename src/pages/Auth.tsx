@@ -50,7 +50,7 @@ type FormValues = z.infer<typeof schema>
 
 const Auth = () => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple } = useAuth()
+  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const { toast } = useToast()
@@ -95,17 +95,6 @@ const Auth = () => {
     }
   }
 
-  async function handleApple() {
-    try {
-      await signInWithApple()
-    } catch (err: unknown) {
-      toast({
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'Something went wrong',
-        variant: 'destructive',
-      })
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
