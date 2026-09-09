@@ -7,7 +7,7 @@ const pillars = [
   {
     Icon: SketchHeartIcon,
     title: "Community first",
-    body: "Built by South Asian women, for South Asian women. We understand the pieces, the occasions, and the culture.",
+    body: "Built within the South Asian community, led by the women who live in these clothes. We understand the pieces, the occasions, and the culture.",
   },
   {
     Icon: SketchLeafIcon,
@@ -58,11 +58,11 @@ const About = () => {
           </h2>
           <div className="space-y-5 text-base md:text-lg text-foreground/85 leading-relaxed">
             <p>
-              Dobaara was founded by a husband and wife who noticed the same thing in their own
-              home — and in the homes of every family around them. A wedding lehenga worth £600,
-              worn once, gathering dust. A sangeet outfit with nowhere to go. We built Dobaara
-              because the community deserved better than Facebook groups and generic resale
-              platforms that don't understand what a lehenga even is.
+              Dobaara started in one home, with one wardrobe. A wedding lehenga worth £600, worn
+              once, gathering dust. A sangeet outfit with nowhere to go. The same story repeated in
+              every family around us. We built Dobaara because the community deserved better than
+              Facebook groups and generic resale platforms that don't understand what a lehenga
+              even is.
             </p>
             <p>
               Our name means <span className="italic text-primary">"again"</span> in Urdu and Hindi.
