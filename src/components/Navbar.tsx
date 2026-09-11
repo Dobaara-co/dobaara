@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import dobaaraLogoAsset from "@/assets/dobaara-logo-trimmed.png.asset.json";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -105,8 +106,12 @@ const Navbar = () => {
       {/* Desktop navbar */}
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="font-display text-2xl font-bold text-primary tracking-tight">
-            Dobaara
+          <Link to="/" className="flex h-12 w-[132px] shrink-0 items-center sm:w-[150px]" aria-label="Dobaara home">
+            <img
+              src={dobaaraLogoAsset.url}
+              alt="Dobaara — Loved once, worn again"
+              className="block h-auto max-h-11 w-full object-contain object-left"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-7">
