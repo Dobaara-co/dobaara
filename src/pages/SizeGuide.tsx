@@ -1,10 +1,10 @@
 const sizeRows = [
-  { uk: "XS", bust: "80–83", waist: "63–66", hips: "88–91" },
-  { uk: "S", bust: "84–87", waist: "67–70", hips: "92–95" },
-  { uk: "M", bust: "88–91", waist: "71–74", hips: "96–99" },
-  { uk: "L", bust: "92–95", waist: "75–78", hips: "100–103" },
-  { uk: "XL", bust: "96–99", waist: "79–82", hips: "104–107" },
-  { uk: "XXL", bust: "100–103", waist: "83–86", hips: "108–111" },
+  { uk: "XS", bustIn: "31–32", bustCm: "80–83", waistIn: "25–26", waistCm: "63–66", hipsIn: "34–36", hipsCm: "88–91" },
+  { uk: "S", bustIn: "33–34", bustCm: "84–87", waistIn: "26–27", waistCm: "67–70", hipsIn: "36–37", hipsCm: "92–95" },
+  { uk: "M", bustIn: "35–36", bustCm: "88–91", waistIn: "28–29", waistCm: "71–74", hipsIn: "38–39", hipsCm: "96–99" },
+  { uk: "L", bustIn: "36–37", bustCm: "92–95", waistIn: "29–31", waistCm: "75–78", hipsIn: "39–40", hipsCm: "100–103" },
+  { uk: "XL", bustIn: "38–39", bustCm: "96–99", waistIn: "31–32", waistCm: "79–82", hipsIn: "41–42", hipsCm: "104–107" },
+  { uk: "XXL", bustIn: "39–40", bustCm: "100–103", waistIn: "33–34", waistCm: "83–86", hipsIn: "42–44", hipsCm: "108–111" },
 ];
 
 const measureSteps = [
@@ -12,6 +12,72 @@ const measureSteps = [
   { label: "Waist", body: "Measure around your natural waistline." },
   { label: "Hips", body: "Measure around the fullest part of your hips." },
   { label: "Length", body: "For lehengas, measured from waist to hem." },
+];
+
+const garmentGuides = [
+  {
+    title: "Lehenga",
+    items: [
+      "Blouse: bust, waist, shoulder, sleeve length, blouse length",
+      "Skirt: waist, hip, length (waist to hem), flare",
+    ],
+  },
+  {
+    title: "Saree",
+    items: [
+      "Length and width of the drape",
+      "Blouse measurements, if included",
+      "Whether fall and pico are already attached",
+    ],
+  },
+  {
+    title: "Salwar Kameez",
+    items: [
+      "Kameez: bust, waist, hip, length",
+      "Salwar: waist and length",
+      "Dupatta included: yes or no",
+    ],
+  },
+  {
+    title: "Anarkali",
+    items: [
+      "Bust, waist, full length",
+      "Flare at the hem",
+    ],
+  },
+  {
+    title: "Sherwani",
+    items: [
+      "Chest, shoulder, sleeve length, full length",
+      "Trouser: waist and length",
+    ],
+  },
+];
+
+const waistTypes = [
+  {
+    name: "Elastic",
+    description: "Gives 1–2 inches of give around the waist. Best for ready-to-wear salwars and lehenga skirts that need to fit a range of sizes.",
+  },
+  {
+    name: "Drawstring (naada)",
+    description: "A fabric cord that lets you tighten or loosen the fit. Common on lehenga skirts and very flexible, but check the maximum waist it can open to.",
+  },
+  {
+    name: "Fixed hook-and-eye",
+    description: "A set closure with almost no give. The listed waist measurement must match yours closely, or the piece will need alteration.",
+  },
+  {
+    name: "Zip",
+    description: "A structured closure with no stretch. Make sure the waist and hip measurements are at or slightly larger than yours for a comfortable fit.",
+  },
+];
+
+const heightGuide = [
+  { height: "5'0\" – 5'2\"", length: "38–40 inches" },
+  { height: "5'3\" – 5'5\"", length: "40–42 inches" },
+  { height: "5'6\" – 5'8\"", length: "42–44 inches" },
+  { height: "5'9\" – 5'11\"", length: "44–46 inches" },
 ];
 
 const tips = [
@@ -27,7 +93,7 @@ const SizeGuide = () => {
       <section className="container py-14 md:py-20 text-center">
         <p className="font-mono text-xs tracking-[0.2em] text-gold uppercase mb-4">Sizing</p>
         <h1 className="font-display text-4xl md:text-5xl font-bold text-primary tracking-tight">
-          Size <span className="italic text-gradient-gold">Guide</span>
+          South Asian Size <span className="italic text-gradient-gold">Guide</span>
         </h1>
         <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
           South Asian clothing sizing varies significantly between designers and regions.
@@ -35,7 +101,48 @@ const SizeGuide = () => {
         </p>
       </section>
 
+      {/* Why South Asian sizing is different */}
       <section className="container pb-12">
+        <div className="max-w-3xl mx-auto rounded-2xl border border-gold/20 bg-card p-6 md:p-8">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary mb-4">
+            Why South Asian sizing is different
+          </h2>
+          <div className="space-y-3 text-base text-foreground/85 leading-relaxed">
+            <p>
+              Most South Asian occasion wear is tailored, not sized off-the-rack. A label that says “Medium” can mean wildly different things depending on the boutique, the cutter, and whether the piece was made in the UK, India, or Pakistan.
+            </p>
+            <p>
+              Many garments also have seam allowance — extra fabric folded inside the seams — which means the size label often does not reflect the actual fit. A piece can usually be taken in, but it can only be let out if there is margin to work with.
+            </p>
+            <p className="font-medium text-primary">
+              Always read the measurements, not the label.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Understanding margin */}
+      <section className="container py-12">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary mb-4">
+            Understanding margin
+          </h2>
+          <div className="space-y-3 text-base text-foreground/85 leading-relaxed">
+            <p>
+              <span className="font-medium text-primary">Margin</span> is the seam allowance built into a garment — the extra fabric folded inside the seams that a tailor can let out. On a blouse, this is typically 1–3 inches.
+            </p>
+            <p>
+              A piece with generous margin fits a wider range of body measurements and is far easier to alter. If a measurement is only slightly smaller than yours, margin can make the difference between a piece that fits and one that does not.
+            </p>
+            <p className="font-medium text-primary">
+              This is the single most important thing to check before buying.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How to measure yourself */}
+      <section className="container py-12">
         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6 md:gap-8 items-start">
           {/* Diagram placeholder */}
           <div className="rounded-2xl border border-gold/20 bg-card p-6 md:p-8 flex flex-col items-center">
@@ -86,20 +193,109 @@ const SizeGuide = () => {
         </div>
       </section>
 
+      {/* How to measure each garment type */}
+      <section className="container py-12">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary text-center mb-8">
+            How to measure each garment type
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {garmentGuides.map((g) => (
+              <div
+                key={g.title}
+                className="rounded-2xl border border-gold/20 bg-card p-5 md:p-6"
+              >
+                <h3 className="font-display text-xl font-semibold text-primary mb-3">
+                  {g.title}
+                </h3>
+                <ul className="space-y-2">
+                  {g.items.map((item, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-foreground/85 leading-relaxed">
+                      <span className="mt-1.5 inline-block h-1.5 w-1.5 rounded-full bg-gold shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Waist types */}
+      <section className="container py-12">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary mb-6">
+            Waist types
+          </h2>
+          <div className="space-y-4">
+            {waistTypes.map((w) => (
+              <div
+                key={w.name}
+                className="rounded-2xl border border-border bg-card p-5 md:p-6"
+              >
+                <h3 className="font-display text-lg font-semibold text-primary mb-2">
+                  {w.name}
+                </h3>
+                <p className="text-sm text-foreground/85 leading-relaxed">
+                  {w.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Height and lehenga length */}
+      <section className="container py-12">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary mb-4">
+            Height and lehenga length
+          </h2>
+          <p className="text-base text-foreground/85 leading-relaxed mb-6">
+            Lehenga length is fixed and cannot easily be lengthened — it can usually only be shortened. Check the listed waist-to-hem measurement against your height before buying.
+          </p>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/60 text-foreground">
+                <tr>
+                  <th className="text-left px-4 py-3 font-display font-semibold">Height</th>
+                  <th className="text-left px-4 py-3 font-display font-semibold">Suggested lehenga length</th>
+                </tr>
+              </thead>
+              <tbody>
+                {heightGuide.map((row, i) => (
+                  <tr
+                    key={row.height}
+                    className={i !== heightGuide.length - 1 ? "border-b border-border" : ""}
+                  >
+                    <td className="px-4 py-3 font-semibold text-primary">{row.height}</td>
+                    <td className="px-4 py-3 text-foreground/85">{row.length}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* Conversion table */}
       <section className="container py-12">
         <div className="max-w-3xl mx-auto">
           <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary text-center mb-6">
             Conversion table
           </h2>
+          <p className="text-center text-sm text-muted-foreground mb-6">
+            Measurements shown in inches first, then centimetres.
+          </p>
           <div className="overflow-hidden rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead className="bg-secondary/60 text-foreground">
                 <tr>
                   <th className="text-left px-4 py-3 font-display font-semibold">UK Size</th>
-                  <th className="text-left px-4 py-3 font-display font-semibold">Bust (cm)</th>
-                  <th className="text-left px-4 py-3 font-display font-semibold">Waist (cm)</th>
-                  <th className="text-left px-4 py-3 font-display font-semibold">Hips (cm)</th>
+                  <th className="text-left px-4 py-3 font-display font-semibold">Bust</th>
+                  <th className="text-left px-4 py-3 font-display font-semibold">Waist</th>
+                  <th className="text-left px-4 py-3 font-display font-semibold">Hips</th>
                 </tr>
               </thead>
               <tbody>
@@ -109,9 +305,15 @@ const SizeGuide = () => {
                     className={i !== sizeRows.length - 1 ? "border-b border-border" : ""}
                   >
                     <td className="px-4 py-3 font-semibold text-primary">{r.uk}</td>
-                    <td className="px-4 py-3 text-foreground/85">{r.bust}</td>
-                    <td className="px-4 py-3 text-foreground/85">{r.waist}</td>
-                    <td className="px-4 py-3 text-foreground/85">{r.hips}</td>
+                    <td className="px-4 py-3 text-foreground/85">
+                      {r.bustIn}" <span className="text-muted-foreground">({r.bustCm} cm)</span>
+                    </td>
+                    <td className="px-4 py-3 text-foreground/85">
+                      {r.waistIn}" <span className="text-muted-foreground">({r.waistCm} cm)</span>
+                    </td>
+                    <td className="px-4 py-3 text-foreground/85">
+                      {r.hipsIn}" <span className="text-muted-foreground">({r.hipsCm} cm)</span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
