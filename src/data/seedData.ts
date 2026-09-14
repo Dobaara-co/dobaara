@@ -31,6 +31,23 @@ export interface Listing {
   createdAt: string;
   tryonStatus?: 'pending' | 'processing' | 'completed' | 'failed' | null;
   tryonImageUrl?: string | null;
+  // Expanded South Asian sizing
+  blouseBustCm?: number;
+  blouseWaistCm?: number;
+  blouseLengthCm?: number;
+  shoulderCm?: number;
+  sleeveLengthCm?: number;
+  blouseMarginCm?: number;
+  skirtWaistCm?: number;
+  skirtLengthCm?: number;
+  skirtFlareCm?: number;
+  skirtMarginCm?: number;
+  marginCm?: number;
+  stitchingStatus?: 'stitched' | 'semi_stitched' | 'unstitched' | null;
+  waistType?: 'elastic' | 'drawstring' | 'fixed' | 'zip' | null;
+  heightMinCm?: number;
+  heightMaxCm?: number;
+  alterationNotes?: string;
 }
 
 export interface Seller {
