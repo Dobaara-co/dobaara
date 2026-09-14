@@ -7,7 +7,32 @@ import type { Listing, Seller } from '@/data/seedData'
 // DB → frontend type mappers
 // ============================================================
 export function mapDbListingToFrontend(row: DBListing): Listing {
+  const extra = row as unknown as Record<string, unknown>
+  const num = (key: string) => {
+    const v = extra[key]
+    return v === null || v === undefined ? undefined : Number(v)
+  }
+  const str = (key: string) => {
+    const v = extra[key]
+    return typeof v === 'string' && v.length > 0 ? v : undefined
+  }
   return {
+    blouseBustCm: num('blouse_bust_cm'),
+    blouseWaistCm: num('blouse_waist_cm'),
+    blouseLengthCm: num('blouse_length_cm'),
+    shoulderCm: num('shoulder_cm'),
+    sleeveLengthCm: num('sleeve_length_cm'),
+    blouseMarginCm: num('blouse_margin_cm'),
+    skirtWaistCm: num('skirt_waist_cm'),
+    skirtLengthCm: num('skirt_length_cm'),
+    skirtFlareCm: num('skirt_flare_cm'),
+    skirtMarginCm: num('skirt_margin_cm'),
+    marginCm: num('margin_cm'),
+    stitchingStatus: str('stitching_status') as Listing['stitchingStatus'],
+    waistType: str('waist_type') as Listing['waistType'],
+    heightMinCm: num('height_min_cm'),
+    heightMaxCm: num('height_max_cm'),
+    alterationNotes: str('alteration_notes'),
     id: row.id,
     sellerId: row.seller_id,
     title: row.title,
