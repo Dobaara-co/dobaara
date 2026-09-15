@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles } from "lucide-react";
 import ModelSelector from "@/components/ModelSelector";
 import { usePageMeta } from "@/lib/seo";
+import ListingMeasurements from "@/components/ListingMeasurements";
 
 const ListingDetail = () => {
   const { id } = useParams();
