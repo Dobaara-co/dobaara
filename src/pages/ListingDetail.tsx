@@ -264,18 +264,8 @@ const ListingDetail = () => {
             )}
           </div>
 
-          {/* Measurements */}
-          {(listing.bustCm || listing.waistCm || listing.hipsCm || listing.lengthCm) && (
-            <div className="mt-5 rounded-lg border border-border p-4">
-              <h3 className="text-sm font-semibold mb-2">Measurements</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                {listing.bustCm && <div><span className="text-muted-foreground">Bust:</span> {listing.bustCm} cm</div>}
-                {listing.waistCm && <div><span className="text-muted-foreground">Waist:</span> {listing.waistCm} cm</div>}
-                {listing.hipsCm && <div><span className="text-muted-foreground">Hips:</span> {listing.hipsCm} cm</div>}
-                {listing.lengthCm && <div><span className="text-muted-foreground">Length:</span> {listing.lengthCm} cm</div>}
-              </div>
-            </div>
-          )}
+          {/* Measurements + fit check */}
+          <ListingMeasurements listing={listing} />
 
           <p className="mt-5 text-sm text-muted-foreground leading-relaxed">{listing.description}</p>
 
