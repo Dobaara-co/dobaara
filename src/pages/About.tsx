@@ -111,14 +111,14 @@ const About = () => {
           <div className="text-center md:text-left">
             <p className="font-mono text-xs tracking-[0.2em] text-gold uppercase mb-3">Our founder</p>
             <h2 className="font-display text-3xl md:text-4xl font-semibold text-primary mb-2">
-              Kiran Mandora
+              Reet Khara
             </h2>
             <p className="font-mono text-xs tracking-[0.15em] text-muted-foreground uppercase mb-5">
               Founder &amp; CEO, Dobaara
             </p>
             <div className="space-y-4 text-base text-foreground/85 leading-relaxed">
               <p>
-                Kiran grew up between wedding seasons and wardrobes packed with outfits that
+                Reet grew up between wedding seasons and wardrobes packed with outfits that
                 deserved more than one night out. After years of lending, borrowing and reselling
                 within her own circle, she started Dobaara to give that trusted, word-of-mouth
                 exchange a proper home online.
