@@ -117,14 +117,14 @@ const About = () => {
               Founder &amp; CEO, Dobaara
             </p>
             <div className="space-y-4 text-base text-foreground/85 leading-relaxed">
-                <p>
-                  Reet grew up between wedding seasons and wardrobes packed with outfits that
+              <p>
+                Reet grew up between wedding seasons and wardrobes packed with outfits that
                 deserved more than one night out. After years of lending, borrowing and reselling
                 within her own circle, she started Dobaara to give that trusted, word-of-mouth
                 exchange a proper home online.
               </p>
-                <p>
-                  She leads Dobaara day to day, working alongside her husband on the technology
+              <p>
+                She leads Dobaara day to day, working alongside her husband on the technology
                 behind the platform.
               </p>
             </div>
