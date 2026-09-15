@@ -123,6 +123,7 @@ const About = () => {
                 within her own circle, she started Dobaara to give that trusted, word-of-mouth
                 exchange a proper home online.
               </p>
+                <p>
                   She leads Dobaara day to day, working alongside her husband on the technology
                 behind the platform.
               </p>
