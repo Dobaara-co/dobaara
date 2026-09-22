@@ -64,6 +64,7 @@ const sustainabilityStats = [
 
 const Index = () => {
   const { data: recentListings = [], isLoading } = useListings({ limit: 8, sort: "newest" });
+  const { data: spotlightListings = [] } = useListings({ spotlightOnly: true, limit: 6 });
 
   return (
     <div className="min-h-screen">
@@ -184,6 +185,26 @@ const Index = () => {
           </div>
         )}
       </section>
+
+      {/* Spotlight */}
+      {spotlightListings.length > 0 && (
+        <section className="container py-12">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <SketchSparkle className="h-5 w-5 text-gold" />
+              <h2 className="text-2xl font-bold">Spotlight</h2>
+            </div>
+            <Link to="/browse" className="text-sm font-medium text-primary hover:underline flex items-center gap-1.5">
+              View all <SketchArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {spotlightListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* How it works */}
       <section className="container py-12">

@@ -77,6 +77,9 @@ export interface Listing {
   // Dupatta dimensions
   dupattaLengthCm?: number;
   dupattaWidthCm?: number;
+  // Visibility boost
+  activeBoostType?: 'featured' | 'spotlight' | null;
+  activeBoostExpiresAt?: string | null;
 }
 
 export interface Seller {

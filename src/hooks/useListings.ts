@@ -4,6 +4,7 @@ import type { Listing as DBListing, ListingWithSeller } from '@/types/database'
 import type { Listing, Seller } from '@/data/seedData'
 import { assessFit } from '@/lib/fitMatch'
 import type { MyMeasurements } from '@/hooks/useMyMeasurements'
+import { effectiveBoostType, boostWeight } from '@/lib/listingBoosts'
 
 // ============================================================
 // DB → frontend type mappers
@@ -91,6 +92,8 @@ export function mapDbListingToFrontend(row: DBListing): Listing {
     createdAt: row.created_at,
     tryonStatus: row.tryon_status ?? null,
     tryonImageUrl: row.tryon_image_url ?? null,
+    activeBoostType: extra['active_boost_type'] as Listing['activeBoostType'] ?? null,
+    activeBoostExpiresAt: extra['active_boost_expires_at'] as string | null ?? null,
   }
 }
 
@@ -123,6 +126,7 @@ export interface ListingFilters {
   sort?: 'newest' | 'price_asc' | 'price_desc' | 'most_saved'
   limit?: number
   fitsMe?: MyMeasurements | null
+  spotlightOnly?: boolean
 }
 
 // ============================================================
@@ -175,14 +179,30 @@ export function useListings(filters: ListingFilters = {}) {
       const { data, error } = await query
       if (error) throw error
       const results = (data ?? []).map(mapDbListingToFrontend)
+      let filtered = results
+
       if (filters.fitsMe) {
         const buyer = filters.fitsMe
-        return results.filter((l) => {
+        filtered = filtered.filter((l) => {
           const fit = assessFit(l, buyer)
           return fit.overall === 'FITS' || fit.overall === 'FITS_WITH_ALTERATION'
         })
       }
-      return results
+
+      if (filters.spotlightOnly) {
+        filtered = filtered.filter((l) =>
+          effectiveBoostType(l.activeBoostType, l.activeBoostExpiresAt) === 'spotlight'
+        )
+      } else if (!filters.sort || filters.sort === 'newest') {
+        // Apply boost weighting on top of the default newest sort
+        filtered = [...filtered].sort((a, b) => {
+          const wa = boostWeight(effectiveBoostType(a.activeBoostType, a.activeBoostExpiresAt))
+          const wb = boostWeight(effectiveBoostType(b.activeBoostType, b.activeBoostExpiresAt))
+          return wb - wa
+        })
+      }
+
+      return filtered
     },
     staleTime: 60_000,
   })

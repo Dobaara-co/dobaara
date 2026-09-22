@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,8 +11,11 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, Package, CheckCircle2, Loader2, CreditCard } from 'lucide-react'
+import { LogOut, Package, CheckCircle2, Loader2, CreditCard, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useSellerListings } from '@/hooks/useListings'
+import { effectiveBoostType, boostDaysRemaining, boostLabel, BOOST_PRICES_PENCE } from '@/lib/listingBoosts'
+import type { BoostType } from '@/lib/listingBoosts'
 
 const schema = z.object({
   full_name: z.string().min(1, 'Name is required'),
@@ -29,6 +32,8 @@ const Account = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [stripeLoading, setStripeLoading] = useState(false)
+  const [boostingListingId, setBoostingListingId] = useState<string | null>(null)
+  const { data: sellerListings = [] } = useSellerListings(user?.id)
 
   const { register, handleSubmit, formState: { errors, isSubmitting, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -40,9 +45,10 @@ const Account = () => {
     },
   })
 
-  // Handle return from Stripe onboarding
+  // Handle return from Stripe onboarding or boost checkout
   useEffect(() => {
     const stripeParam = searchParams.get('stripe')
+    const boostParam = searchParams.get('boost')
     if (stripeParam === 'success') {
       toast({ title: 'Payment setup complete!', description: 'You can now receive payouts from sales.' })
       queryClient.invalidateQueries({ queryKey: ['profile'] })
@@ -52,6 +58,9 @@ const Account = () => {
         description: 'Please complete your payment setup to start selling.',
         variant: 'destructive',
       })
+    } else if (boostParam === 'success') {
+      toast({ title: 'Boost activated!', description: 'Your listing is now boosted for 7 days.' })
+      queryClient.invalidateQueries({ queryKey: ['listings', 'seller'] })
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -98,6 +107,24 @@ const Account = () => {
         variant: 'destructive',
       })
       setStripeLoading(false)
+    }
+  }
+
+  async function handleBoost(listingId: string, boostType: BoostType) {
+    setBoostingListingId(listingId)
+    try {
+      const { data, error } = await supabase.functions.invoke('create-boost-checkout', {
+        body: { listing_id: listingId, seller_id: user!.id, boost_type: boostType },
+      })
+      if (error || !data?.checkout_url) throw new Error(error?.message ?? 'Could not start checkout')
+      window.location.href = data.checkout_url
+    } catch (err) {
+      toast({
+        title: 'Could not start boost',
+        description: err instanceof Error ? err.message : 'Please try again.',
+        variant: 'destructive',
+      })
+      setBoostingListingId(null)
     }
   }
 
@@ -165,6 +192,67 @@ const Account = () => {
           + List an item for sale
         </Button>
       </div>
+
+      {/* Your listings */}
+      {sellerListings.length > 0 && (
+        <div className="mb-8 p-4 rounded-lg border border-border bg-card">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="h-4 w-4 text-gold" />
+            <span className="font-semibold text-sm">Your Listings</span>
+          </div>
+          <div className="space-y-3">
+            {sellerListings.map((listing) => {
+              const active = effectiveBoostType(listing.activeBoostType, listing.activeBoostExpiresAt)
+              const daysLeft = boostDaysRemaining(listing.activeBoostExpiresAt)
+              const isLoading = boostingListingId === listing.id
+              return (
+                <div key={listing.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  {listing.images[listing.primaryImageIndex] && (
+                    <img
+                      src={listing.images[listing.primaryImageIndex]}
+                      alt={listing.title}
+                      className="h-12 w-12 rounded-md object-cover shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <Link to={`/listing/${listing.id}`} className="text-sm font-medium hover:underline line-clamp-1">
+                      {listing.title}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">£{(listing.price / 100).toFixed(2)}</p>
+                    {active ? (
+                      <p className="text-xs text-gold font-medium mt-0.5">
+                        {boostLabel(active)} · {daysLeft}d left
+                      </p>
+                    ) : null}
+                  </div>
+                  {!active && (
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 px-2"
+                        disabled={isLoading}
+                        onClick={() => handleBoost(listing.id, 'featured')}
+                      >
+                        {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : `Featured £${(BOOST_PRICES_PENCE.featured / 100).toFixed(2)}`}
+                      </Button>
+                      <Button
+                        variant="gold"
+                        size="sm"
+                        className="text-xs h-7 px-2"
+                        disabled={isLoading}
+                        onClick={() => handleBoost(listing.id, 'spotlight')}
+                      >
+                        {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : `Spotlight £${(BOOST_PRICES_PENCE.spotlight / 100).toFixed(2)}`}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Stripe payment setup */}
       <div className="mb-8 p-4 rounded-lg border border-border bg-card">

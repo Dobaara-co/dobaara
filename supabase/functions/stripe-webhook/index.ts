@@ -114,8 +114,35 @@ serve(async (req) => {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      const { order_id, seller_id, listing_id } = session.metadata ?? {};
+      const { type: metaType, order_id, seller_id, listing_id, boost_type, amount_pence } = session.metadata ?? {};
 
+      // ── Boost purchase ────────────────────────────────────────────────────────
+      if (metaType === "boost" && listing_id && seller_id && boost_type) {
+        const durationMs = 7 * 24 * 60 * 60 * 1000;
+        const expiresAt = new Date(Date.now() + durationMs).toISOString();
+
+        await supabase.from("listing_boosts").insert({
+          listing_id,
+          seller_id,
+          boost_type,
+          amount_pence: Number(amount_pence ?? 0),
+          stripe_session_id: session.id,
+          expires_at: expiresAt,
+        });
+
+        await supabase
+          .from("listings")
+          .update({ active_boost_type: boost_type, active_boost_expires_at: expiresAt })
+          .eq("id", listing_id);
+
+        console.log(`[stripe-webhook] Boost activated: ${boost_type} on listing ${listing_id} until ${expiresAt}`);
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // ── Order purchase ────────────────────────────────────────────────────────
       if (order_id) {
         await supabase
           .from("orders")
