@@ -57,6 +57,8 @@ export function mapDbListingToFrontend(row: DBListing): Listing {
     sherwaniMarginCm: num('sherwani_margin_cm'),
     trouserWaistCm: num('trouser_waist_cm'),
     trouserLengthCm: num('trouser_length_cm'),
+    dupattaLengthCm: num('dupatta_length_cm'),
+    dupattaWidthCm: num('dupatta_width_cm'),
     id: row.id,
     sellerId: row.seller_id,
     title: row.title,

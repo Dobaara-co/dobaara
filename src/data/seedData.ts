@@ -74,6 +74,9 @@ export interface Listing {
   sherwaniMarginCm?: number;
   trouserWaistCm?: number;
   trouserLengthCm?: number;
+  // Dupatta dimensions
+  dupattaLengthCm?: number;
+  dupattaWidthCm?: number;
 }
 
 export interface Seller {
