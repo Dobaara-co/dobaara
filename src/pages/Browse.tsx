@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { categoryLabels, conditionLabels } from "@/data/seedData";
 import { useListings, type ListingFilters } from "@/hooks/useListings";
+import { useMyMeasurements } from "@/hooks/useMyMeasurements";
+import { useAuth } from "@/contexts/AuthContext";
 import ListingCard from "@/components/ListingCard";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -28,6 +30,10 @@ const Browse = () => {
   const [sort, setSort] = useState<ListingFilters["sort"]>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [fitsMe, setFitsMe] = useState(false);
+
+  const { user } = useAuth();
+  const { data: myMeasurements } = useMyMeasurements();
 
   const { data: filtered = [], isLoading } = useListings({
     categories: selectedCategories.length ? selectedCategories : undefined,
@@ -36,13 +42,14 @@ const Browse = () => {
     sizes: selectedSizes.length ? selectedSizes : undefined,
     verifiedOnly: verifiedOnly || undefined,
     sort,
+    fitsMe: fitsMe && myMeasurements ? myMeasurements : undefined,
   });
 
   const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
     setter(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
   };
 
-  const activeFilters = selectedCategories.length + selectedOccasions.length + selectedConditions.length + selectedSizes.length + (verifiedOnly ? 1 : 0);
+  const activeFilters = selectedCategories.length + selectedOccasions.length + selectedConditions.length + selectedSizes.length + (verifiedOnly ? 1 : 0) + (fitsMe ? 1 : 0);
 
   const clearAll = () => {
     setSelectedCategories([]);
@@ -50,6 +57,7 @@ const Browse = () => {
     setSelectedConditions([]);
     setSelectedSizes([]);
     setVerifiedOnly(false);
+    setFitsMe(false);
   };
 
   const FilterSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -105,6 +113,26 @@ const Browse = () => {
           <input type="checkbox" checked={verifiedOnly} onChange={() => setVerifiedOnly(!verifiedOnly)} className="rounded" />
           <span className="text-sm font-medium">Dobaara Verified only</span>
         </label>
+      </div>
+      <div className="mb-5">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={fitsMe}
+            onChange={() => setFitsMe(!fitsMe)}
+            className="rounded"
+            disabled={!user || !myMeasurements}
+          />
+          <span className={`text-sm font-medium ${!user || !myMeasurements ? "text-muted-foreground" : ""}`}>
+            Fits me
+          </span>
+        </label>
+        {!user && (
+          <p className="mt-1 text-xs text-muted-foreground">Sign in and add your measurements to use this filter.</p>
+        )}
+        {user && !myMeasurements && (
+          <p className="mt-1 text-xs text-muted-foreground">Add your measurements in account settings to use this filter.</p>
+        )}
       </div>
       {activeFilters > 0 && (
         <Button variant="ghost" size="sm" onClick={clearAll} className="text-destructive">

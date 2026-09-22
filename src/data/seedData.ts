@@ -48,6 +48,32 @@ export interface Listing {
   heightMinCm?: number;
   heightMaxCm?: number;
   alterationNotes?: string;
+  // Saree-specific
+  sareeLengthCm?: number;
+  sareeWidthCm?: number;
+  fallPicoAttached?: boolean;
+  blouseIncluded?: boolean;
+  // Salwar kameez-specific
+  kameezBustCm?: number;
+  kameezWaistCm?: number;
+  kameezHipCm?: number;
+  kameezLengthCm?: number;
+  kameezMarginCm?: number;
+  salwarWaistCm?: number;
+  salwarLengthCm?: number;
+  dupattaIncluded?: boolean;
+  // Anarkali-specific
+  anarkaliiBustCm?: number;
+  anarkaliWaistCm?: number;
+  anarkaliFullLengthCm?: number;
+  anarkaliiFlareCm?: number;
+  anarkaliMarginCm?: number;
+  // Sherwani-specific
+  sherwaniChestCm?: number;
+  sherwaniFullLengthCm?: number;
+  sherwaniMarginCm?: number;
+  trouserWaistCm?: number;
+  trouserLengthCm?: number;
 }
 
 export interface Seller {

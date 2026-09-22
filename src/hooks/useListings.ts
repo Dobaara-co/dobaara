@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Listing as DBListing, ListingWithSeller } from '@/types/database'
 import type { Listing, Seller } from '@/data/seedData'
+import { assessFit } from '@/lib/fitMatch'
+import type { MyMeasurements } from '@/hooks/useMyMeasurements'
 
 // ============================================================
 // DB → frontend type mappers
@@ -33,6 +35,28 @@ export function mapDbListingToFrontend(row: DBListing): Listing {
     heightMinCm: num('height_min_cm'),
     heightMaxCm: num('height_max_cm'),
     alterationNotes: str('alteration_notes'),
+    sareeLengthCm: num('saree_length_cm'),
+    sareeWidthCm: num('saree_width_cm'),
+    fallPicoAttached: extra['fall_pico_attached'] === true,
+    blouseIncluded: extra['blouse_included'] === true,
+    kameezBustCm: num('kameez_bust_cm'),
+    kameezWaistCm: num('kameez_waist_cm'),
+    kameezHipCm: num('kameez_hip_cm'),
+    kameezLengthCm: num('kameez_length_cm'),
+    kameezMarginCm: num('kameez_margin_cm'),
+    salwarWaistCm: num('salwar_waist_cm'),
+    salwarLengthCm: num('salwar_length_cm'),
+    dupattaIncluded: extra['dupatta_included'] === true,
+    anarkaliiBustCm: num('anarkali_bust_cm'),
+    anarkaliWaistCm: num('anarkali_waist_cm'),
+    anarkaliFullLengthCm: num('anarkali_full_length_cm'),
+    anarkaliiFlareCm: num('anarkali_flare_cm'),
+    anarkaliMarginCm: num('anarkali_margin_cm'),
+    sherwaniChestCm: num('sherwani_chest_cm'),
+    sherwaniFullLengthCm: num('sherwani_full_length_cm'),
+    sherwaniMarginCm: num('sherwani_margin_cm'),
+    trouserWaistCm: num('trouser_waist_cm'),
+    trouserLengthCm: num('trouser_length_cm'),
     id: row.id,
     sellerId: row.seller_id,
     title: row.title,
@@ -96,6 +120,7 @@ export interface ListingFilters {
   verifiedOnly?: boolean
   sort?: 'newest' | 'price_asc' | 'price_desc' | 'most_saved'
   limit?: number
+  fitsMe?: MyMeasurements | null
 }
 
 // ============================================================
@@ -147,7 +172,15 @@ export function useListings(filters: ListingFilters = {}) {
 
       const { data, error } = await query
       if (error) throw error
-      return (data ?? []).map(mapDbListingToFrontend)
+      const results = (data ?? []).map(mapDbListingToFrontend)
+      if (filters.fitsMe) {
+        const buyer = filters.fitsMe
+        return results.filter((l) => {
+          const fit = assessFit(l, buyer)
+          return fit.overall === 'FITS' || fit.overall === 'FITS_WITH_ALTERATION'
+        })
+      }
+      return results
     },
     staleTime: 60_000,
   })

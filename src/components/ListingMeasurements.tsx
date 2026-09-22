@@ -3,6 +3,7 @@ import { Ruler, Scissors, CheckCircle2, AlertTriangle, HelpCircle, MoveHorizonta
 import type { Listing } from "@/data/seedData";
 import { useMyMeasurements } from "@/hooks/useMyMeasurements";
 import { useAuth } from "@/contexts/AuthContext";
+import { assessFit, type ComponentFit } from "@/lib/fitMatch";
 
 const toIn = (cm: number) => Math.round((cm / 2.54) * 10) / 10;
 const both = (cm?: number) => (cm ? `${toIn(cm)}" / ${Math.round(cm)} cm` : null);
@@ -38,15 +39,16 @@ function buildGroups(listing: Listing): Group[] {
     : "Garment";
 
   const topRows: Row[] = [
-    { label: "Bust / chest", cm: listing.blouseBustCm ?? listing.bustCm },
-    { label: "Waist", cm: listing.blouseWaistCm ?? (groupsHasBottom(c) ? undefined : listing.waistCm) },
+    { label: "Bust / chest", cm: listing.blouseBustCm ?? listing.kameezBustCm ?? listing.anarkaliiBustCm ?? listing.sherwaniChestCm ?? listing.bustCm },
+    { label: "Waist", cm: listing.blouseWaistCm ?? listing.kameezWaistCm ?? listing.anarkaliWaistCm ?? (groupsHasBottom(c) ? undefined : listing.waistCm) },
     { label: "Shoulder", cm: listing.shoulderCm },
     { label: "Sleeve length", cm: listing.sleeveLengthCm },
-    { label: "Length", cm: listing.blouseLengthCm ?? (groupsHasBottom(c) ? undefined : listing.lengthCm) },
+    { label: "Length", cm: listing.blouseLengthCm ?? listing.kameezLengthCm ?? listing.anarkaliFullLengthCm ?? listing.sherwaniFullLengthCm ?? (groupsHasBottom(c) ? undefined : listing.lengthCm) },
   ].filter((r) => !!r.cm);
 
+  const topMargin = listing.blouseMarginCm ?? listing.kameezMarginCm ?? listing.anarkaliMarginCm ?? listing.sherwaniMarginCm ?? listing.marginCm;
   if (topRows.length) {
-    groups.push({ title: topTitle, rows: topRows, marginCm: listing.blouseMarginCm ?? listing.marginCm });
+    groups.push({ title: topTitle, rows: topRows, marginCm: topMargin });
   }
 
   const bottomTitle = c.includes("lehenga")
@@ -60,14 +62,15 @@ function buildGroups(listing: Listing): Group[] {
     : "Fit";
 
   const bottomRows: Row[] = [
-    { label: "Waist", cm: listing.skirtWaistCm ?? (topRows.some((r) => r.label === "Waist") ? undefined : listing.waistCm) },
-    { label: "Hips", cm: listing.hipsCm },
-    { label: "Length", cm: listing.skirtLengthCm ?? (topRows.some((r) => r.label === "Length") ? undefined : listing.lengthCm) },
-    { label: "Flare (ghera)", cm: listing.skirtFlareCm },
+    { label: "Waist", cm: listing.skirtWaistCm ?? listing.salwarWaistCm ?? listing.trouserWaistCm ?? (topRows.some((r) => r.label === "Waist") ? undefined : listing.waistCm) },
+    { label: "Hips", cm: listing.kameezHipCm ?? listing.hipsCm },
+    { label: "Length", cm: listing.skirtLengthCm ?? listing.salwarLengthCm ?? listing.sareeLengthCm ?? listing.trouserLengthCm ?? (topRows.some((r) => r.label === "Length") ? undefined : listing.lengthCm) },
+    { label: "Flare (ghera)", cm: listing.skirtFlareCm ?? listing.anarkaliiFlareCm },
   ].filter((r) => !!r.cm);
 
+  const bottomMargin = listing.skirtMarginCm ?? listing.marginCm;
   if (bottomRows.length) {
-    groups.push({ title: bottomTitle, rows: bottomRows, marginCm: listing.skirtMarginCm ?? listing.marginCm });
+    groups.push({ title: bottomTitle, rows: bottomRows, marginCm: bottomMargin });
   }
 
   return groups;
@@ -77,29 +80,16 @@ function groupsHasBottom(c: string) {
   return c.includes("lehenga") || c.includes("salwar") || c.includes("kameez") || c.includes("sherwani");
 }
 
-type FitState = "fits" | "alteration" | "unlikely";
-
-function assessFit(listing: Listing, me: { bustCm?: number; waistCm?: number; hipsCm?: number }) {
-  const checks: { label: string; state: FitState }[] = [];
-  const compare = (label: string, mine?: number, garment?: number, margin?: number) => {
-    if (!mine || !garment) return;
-    if (mine <= garment) checks.push({ label, state: "fits" });
-    else if (margin && mine <= garment + margin) checks.push({ label, state: "alteration" });
-    else checks.push({ label, state: "unlikely" });
-  };
-  const topMargin = listing.blouseMarginCm ?? listing.marginCm;
-  const bottomMargin = listing.skirtMarginCm ?? listing.marginCm;
-  compare("Bust", me.bustCm, listing.blouseBustCm ?? listing.bustCm, topMargin);
-  compare("Waist", me.waistCm, listing.skirtWaistCm ?? listing.waistCm ?? listing.blouseWaistCm, bottomMargin);
-  compare("Hips", me.hipsCm, listing.hipsCm, bottomMargin);
-  if (!checks.length) return null;
-  const state: FitState = checks.some((c) => c.state === "unlikely")
-    ? "unlikely"
-    : checks.some((c) => c.state === "alteration")
-    ? "alteration"
-    : "fits";
-  return { state, checks };
-}
+const fitStyles: Record<ComponentFit, string> = {
+  FITS: "border-success/40 bg-success/10 text-success",
+  FITS_WITH_ALTERATION: "border-accent/50 bg-accent/10 text-accent-foreground",
+  UNLIKELY: "border-border bg-muted text-muted-foreground",
+};
+const fitCopy: Record<ComponentFit, string> = {
+  FITS: "Should fit you",
+  FITS_WITH_ALTERATION: "Fits with alteration",
+  UNLIKELY: "May not fit",
+};
 
 const ListingMeasurements = ({ listing }: { listing: Listing }) => {
   const { user } = useAuth();
@@ -116,19 +106,6 @@ const ListingMeasurements = ({ listing }: { listing: Listing }) => {
   if (!hasAnything) return null;
 
   const fit = me ? assessFit(listing, me) : null;
-  const marginTop = listing.blouseMarginCm ?? listing.marginCm;
-  const marginBottom = listing.skirtMarginCm;
-
-  const fitStyles: Record<FitState, string> = {
-    fits: "border-success/40 bg-success/10 text-success",
-    alteration: "border-accent/50 bg-accent/10 text-accent-foreground",
-    unlikely: "border-border bg-muted text-muted-foreground",
-  };
-  const fitCopy: Record<FitState, string> = {
-    fits: "Should fit you",
-    alteration: "Fits with alteration",
-    unlikely: "May not fit",
-  };
 
   return (
     <div className="mt-5 space-y-4">
@@ -148,26 +125,34 @@ const ListingMeasurements = ({ listing }: { listing: Listing }) => {
               {user ? "Add your measurements" : "Sign in to add measurements"}
             </Link>
           </div>
-        ) : !fit ? (
+        ) : !fit || fit.overall === 'NO_DATA' ? (
           <p className="mt-2 text-sm text-muted-foreground">
             Not enough measurements on this listing to compare.
           </p>
+        ) : fit.unstitchedNote ? (
+          <div className="mt-2 text-sm text-muted-foreground">
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1 text-sm font-semibold text-success">
+              <CheckCircle2 className="h-4 w-4" /> Should fit you
+            </div>
+            <p className="mt-2">This piece is unstitched and can be tailored to your exact measurements.</p>
+          </div>
         ) : (
           <div className="mt-3">
-            <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${fitStyles[fit.state]}`}>
-              {fit.state === "fits" ? (
+            <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${fitStyles[fit.overall as ComponentFit]}`}>
+              {fit.overall === 'FITS' ? (
                 <CheckCircle2 className="h-4 w-4" />
-              ) : fit.state === "alteration" ? (
+              ) : fit.overall === 'FITS_WITH_ALTERATION' ? (
                 <AlertTriangle className="h-4 w-4" />
               ) : (
                 <HelpCircle className="h-4 w-4" />
               )}
-              {fitCopy[fit.state]}
+              {fitCopy[fit.overall as ComponentFit]}
             </div>
             <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
-              {fit.checks.map((c) => (
-                <li key={c.label}>
-                  <span className="font-medium text-foreground">{c.label}:</span> {fitCopy[c.state].toLowerCase()}
+              {fit.components.map((c) => (
+                <li key={c.component}>
+                  <span className="font-medium text-foreground">{c.component}:</span>{" "}
+                  {fitCopy[c.state].toLowerCase()}
                 </li>
               ))}
             </ul>
