@@ -272,7 +272,7 @@ const DobaaraVerified = () => {
           <div className="rounded-2xl border border-gold/30 bg-[hsl(var(--gold-light))]/60 p-6 md:p-7">
             <h3 className="font-display text-xl font-semibold text-primary mb-4">Pricing</h3>
             <p className="font-display text-2xl md:text-3xl font-bold text-primary">
-              We charge 25% commission.
+              Contact us for concierge service pricing.
             </p>
             <p className="font-display italic text-lg text-gradient-gold mt-1">
               You keep 75%.

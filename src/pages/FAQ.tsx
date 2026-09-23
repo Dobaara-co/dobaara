@@ -36,7 +36,7 @@ const groups: { id: string; title: string; items: QA[] }[] = [
     items: [
       {
         q: "How much does it cost to sell?",
-        a: "Listing is free. We charge 10% commission when your item sells (8% for Founding Sellers).",
+        a: "Listing is free. You keep 100% of your listing price; buyers cover protection and postage separately.",
       },
       {
         q: "When do I get paid?",
@@ -44,7 +44,7 @@ const groups: { id: string; title: string; items: QA[] }[] = [
       },
       {
         q: "How do I become a Founding Seller?",
-        a: "The first 500 sellers on Dobaara receive Founding Seller status — 8% commission for life and a permanent badge on your profile.",
+        a: "The first 500 sellers on Dobaara receive Founding Seller status and a permanent badge on their profile.",
       },
       {
         q: "What can I sell on Dobaara?",
@@ -58,7 +58,7 @@ const groups: { id: string; title: string; items: QA[] }[] = [
     items: [
       {
         q: "What is Dobaara Verified?",
-        a: "Our premium concierge service. You send us your item, we photograph, authenticate, list and ship it professionally. We charge 25% commission.",
+        a: "Our premium concierge service. You send us your item and we photograph, authenticate, list and ship it professionally.",
       },
       {
         q: "What condition do items need to be for Dobaara Verified?",

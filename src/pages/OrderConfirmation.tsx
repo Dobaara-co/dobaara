@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Package, Bell, Truck, Star } from "lucide-react";
+import { Package, Bell, Truck, Star, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 
 type OrderWithListing = {
   id: string;
   amount: number;
+  item_price_amount: number | null;
+  buyer_protection_amount: number | null;
+  postage_amount: number | null;
   status: string;
   created_at: string;
   listing: {
@@ -76,7 +79,7 @@ const OrderConfirmation = () => {
       }
       const { data } = await supabase
         .from("orders")
-        .select("id, amount, status, created_at, listing:listings(id, title, images)")
+        .select("id, amount, item_price_amount, buyer_protection_amount, postage_amount, status, created_at, listing:listings(id, title, images)")
         .eq("id", orderId)
         .maybeSingle();
       if (!cancelled) {
@@ -118,6 +121,9 @@ const OrderConfirmation = () => {
 
   const thumbnail = order.listing?.images?.[0];
   const reference = order.id.slice(0, 8).toUpperCase();
+  const itemPrice = order.item_price_amount ?? order.amount;
+  const buyerProtection = order.buyer_protection_amount ?? 0;
+  const postage = order.postage_amount ?? 0;
 
   const steps = [
     { icon: Bell, title: "Seller notified", desc: "The seller has received your order and will prepare your item." },
@@ -155,12 +161,29 @@ const OrderConfirmation = () => {
               <h2 className="font-display text-xl text-[#8B5E3C] truncate">
                 {order.listing?.title ?? "Listing"}
               </h2>
-              <p className="mt-1 font-body text-2xl text-[#3d2b1f] font-semibold">
-                {formatGbp(order.amount)}
-              </p>
               <span className="inline-block mt-2 text-xs font-medium px-3 py-1 rounded-full bg-[#7A9B6E]/15 text-[#5a7a50] uppercase tracking-wider">
                 Payment confirmed
               </span>
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-2 border-t border-gold/20 pt-4 text-sm">
+            <div className="flex justify-between gap-4"><span className="text-muted-foreground">Item price</span><span>{formatGbp(itemPrice)}</span></div>
+            <div className="flex items-center justify-between gap-4">
+              <details className="group">
+                <summary className="flex cursor-pointer list-none items-center gap-1 text-muted-foreground">
+                  Buyer protection <ShieldCheck className="h-3.5 w-3.5 text-gold" />
+                </summary>
+                <p className="mt-2 max-w-sm text-xs leading-relaxed text-muted-foreground">
+                  Covers dispute resolution and secure payment holding until delivery is confirmed.
+                  Guaranteed tracking is included.
+                </p>
+              </details>
+              <span>{formatGbp(buyerProtection)}</span>
+            </div>
+            <div className="flex justify-between gap-4"><span className="text-muted-foreground">Postage</span><span>{formatGbp(postage)}</span></div>
+            <div className="flex justify-between gap-4 border-t border-border pt-3 text-base font-semibold">
+              <span>Total</span><span>{formatGbp(order.amount)}</span>
             </div>
           </div>
 

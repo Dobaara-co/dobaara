@@ -351,7 +351,7 @@ const ListingDetail = () => {
             <Shield className="h-3.5 w-3.5" /> Secure checkout powered by Stripe · Buyer protection included
           </div>
 
-          {isOwner && <BoostListingCard listing={listing} sellerId={user.id} />}
+          {isOwner && <BoostListingCard listing={listing} sellerId={listing.sellerId} />}
 
           {/* Seller card */}
           {seller && (
