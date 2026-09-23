@@ -43,7 +43,7 @@ function formatPence(pence: number): string {
   return `£${(pence / 100).toFixed(2)}`;
 }
 
-function saleEmailHtml(itemName: string, salePrice: number, payoutAmount: number): string {
+function saleEmailHtml(itemName: string, itemPrice: number, payoutAmount: number): string {
   return `
     <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
       <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">
@@ -55,7 +55,7 @@ function saleEmailHtml(itemName: string, salePrice: number, payoutAmount: number
           <p style="font-size:16px;margin:0 0 16px">Great news — your item has sold!</p>
           <table style="width:100%;border-collapse:collapse;font-size:14px">
             <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600;width:140px">Item</td><td style="padding:8px 0">${itemName}</td></tr>
-            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Sale price</td><td style="padding:8px 0">${formatPence(salePrice)}</td></tr>
+            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Item price</td><td style="padding:8px 0">${formatPence(itemPrice)}</td></tr>
             <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Your payout</td><td style="padding:8px 0;font-weight:600">${formatPence(payoutAmount)}</td></tr>
           </table>
           <div style="margin-top:20px;padding:16px;background:#fef9f0;border:1px solid #e8ddd0;border-radius:8px;font-size:14px">
@@ -63,7 +63,7 @@ function saleEmailHtml(itemName: string, salePrice: number, payoutAmount: number
           </div>
         </div>
         <div style="background:#f9f4ef;padding:16px 32px;font-size:12px;color:#999;border-top:1px solid #e8ddd0">
-          Dobaara · dobaara.co
+          No commission was deducted · Dobaara · dobaara.co
         </div>
       </div>
     </div>
@@ -165,7 +165,7 @@ serve(async (req) => {
       if (seller_id && order_id) {
         const { data: order } = await supabase
           .from("orders")
-          .select("seller_payout_amount, amount, listings(title)")
+          .select("seller_payout_amount, item_price_amount, listings(title)")
           .eq("id", order_id)
           .single();
 
@@ -178,7 +178,7 @@ serve(async (req) => {
               "You've made a sale on Dobaara! 🎉",
               saleEmailHtml(
                 listing?.title ?? "Your item",
-                order.amount,
+                order.item_price_amount ?? order.seller_payout_amount ?? 0,
                 order.seller_payout_amount ?? 0,
               ),
             );

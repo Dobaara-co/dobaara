@@ -45,9 +45,9 @@ const sellerSteps = [
 
 const fees = [
   { label: "Listing fee", value: "Free" },
-  { label: "Standard commission", value: "10% on sale price" },
-  { label: "Founding Seller commission", value: "8% (first 500 sellers)" },
-  { label: "Dobaara Verified", value: "25% (we do everything)" },
+  { label: "Seller payout", value: "100% of your listing price" },
+  { label: "Buyer protection", value: "Paid separately by the buyer" },
+  { label: "Postage", value: "Paid separately by the buyer" },
 ];
 
 const StepList = ({ steps, accent }: { steps: typeof buyerSteps; accent: "primary" | "gold" }) => (

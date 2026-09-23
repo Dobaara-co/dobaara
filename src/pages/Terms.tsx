@@ -45,7 +45,7 @@ const Terms = () => (
         body: (
           <ul className="list-disc pl-5 space-y-2">
             <li>Listing is free</li>
-            <li>Dobaara charges a commission on completed sales: 10% standard, 8% Founding Sellers, 25% Dobaara Verified</li>
+            <li>Sellers keep 100% of their listing price; buyers pay buyer protection and postage separately</li>
             <li>Payouts are processed within 7 days of delivery confirmation</li>
           </ul>
         ),

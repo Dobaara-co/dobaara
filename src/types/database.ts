@@ -97,6 +97,8 @@ export interface Database {
           tryon_task_id: string | null
           tryon_error: string | null
           tryon_cost_pence: number | null
+          active_boost_type: 'featured' | 'spotlight' | null
+          active_boost_expires_at: string | null
           created_at: string
           updated_at: string
         }
@@ -130,6 +132,8 @@ export interface Database {
           ships_from?: string | null
           ships_to?: string[]
           tags?: string[]
+          active_boost_type?: 'featured' | 'spotlight' | null
+          active_boost_expires_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -159,6 +163,8 @@ export interface Database {
           ships_from?: string | null
           ships_to?: string[]
           tags?: string[]
+          active_boost_type?: 'featured' | 'spotlight' | null
+          active_boost_expires_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -170,6 +176,11 @@ export interface Database {
           buyer_id: string
           seller_id: string
           amount: number
+          item_price_amount: number | null
+          buyer_protection_amount: number | null
+          postage_amount: number | null
+          platform_fee_amount: number | null
+          seller_payout_amount: number | null
           status: string
           stripe_payment_intent_id: string | null
           shipping_address: Json | null
@@ -182,7 +193,17 @@ export interface Database {
           buyer_id: string
           seller_id: string
           amount: number
+          item_price_amount?: number | null
+          buyer_protection_amount?: number | null
+          postage_amount?: number | null
+          platform_fee_amount?: number | null
+          seller_payout_amount?: number | null
           status?: string
+          item_price_amount?: number | null
+          buyer_protection_amount?: number | null
+          postage_amount?: number | null
+          platform_fee_amount?: number | null
+          seller_payout_amount?: number | null
           stripe_payment_intent_id?: string | null
           shipping_address?: Json | null
           created_at?: string
