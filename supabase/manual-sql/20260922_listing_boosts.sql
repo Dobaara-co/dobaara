@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS listing_boosts (
   created_at    timestamptz NOT NULL DEFAULT now()
 );
 
+GRANT SELECT ON public.listing_boosts TO authenticated;
+GRANT ALL ON public.listing_boosts TO service_role;
+
 CREATE INDEX IF NOT EXISTS listing_boosts_listing_id_idx ON listing_boosts(listing_id);
 CREATE INDEX IF NOT EXISTS listing_boosts_seller_id_idx  ON listing_boosts(seller_id);
 CREATE INDEX IF NOT EXISTS listing_boosts_expires_at_idx ON listing_boosts(expires_at);

@@ -10,10 +10,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function commissionRate(isFoundingSeller: boolean, isVipListing: boolean): number {
-  if (isVipListing) return 0.25;
-  if (isFoundingSeller) return 0.08;
-  return 0.10;
+function buyerProtection(itemPricePence: number): number {
+  return Math.round(itemPricePence * 0.035) + 30;
 }
 
 async function stripePost(path: string, params: Record<string, string>) {
@@ -68,12 +66,10 @@ serve(async (req) => {
       is_vip_seller: boolean;
     };
 
-    // Commission calculation
     const postage = listing.free_postage ? 0 : (listing.postage_price ?? 0);
-    const totalAmount = listing.price + postage;
-    const rate = commissionRate(seller.is_founding_seller, listing.is_vip_verified);
-    const platformFee = Math.round(listing.price * rate);
-    const sellerPayout = totalAmount - platformFee;
+    const protection = buyerProtection(listing.price);
+    const totalAmount = listing.price + protection + postage;
+    const sellerPayout = listing.price;
 
     // Create pending order first so we have an ID for the success URL
     const { data: order, error: orderError } = await supabase
@@ -84,7 +80,10 @@ serve(async (req) => {
         seller_id: listing.seller_id,
         amount: totalAmount,
         status: "pending",
-        platform_fee_amount: platformFee,
+        item_price_amount: listing.price,
+        buyer_protection_amount: protection,
+        postage_amount: postage,
+        platform_fee_amount: protection,
         seller_payout_amount: sellerPayout,
       })
       .select("id")
@@ -116,7 +115,7 @@ serve(async (req) => {
     };
 
     if (!isTestMode) {
-      params["payment_intent_data[application_fee_amount]"] = String(platformFee);
+      params["payment_intent_data[application_fee_amount]"] = String(protection);
       params["payment_intent_data[transfer_data][destination]"] = seller.stripe_account_id!;
     } else {
       // TEST MODE - no transfer
@@ -129,6 +128,14 @@ serve(async (req) => {
       params["line_items[1][price_data][product_data][name]"] = "Postage & Packaging";
       params["line_items[1][quantity]"] = "1";
     }
+
+    const protectionIndex = postage > 0 ? 2 : 1;
+    params[`line_items[${protectionIndex}][price_data][currency]`] = "gbp";
+    params[`line_items[${protectionIndex}][price_data][unit_amount]`] = String(protection);
+    params[`line_items[${protectionIndex}][price_data][product_data][name]`] = "Buyer Protection";
+    params[`line_items[${protectionIndex}][price_data][product_data][description]`] =
+      "Dispute resolution, secure payment holding and guaranteed tracking";
+    params[`line_items[${protectionIndex}][quantity]`] = "1";
 
     const session = await stripePost("/checkout/sessions", params);
 
