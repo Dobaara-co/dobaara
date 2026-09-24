@@ -198,9 +198,11 @@ const Index = () => {
               View all <SketchArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
             {spotlightListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <div key={listing.id} className="w-[72vw] max-w-[280px] shrink-0 snap-start sm:w-[280px]">
+                <ListingCard listing={listing} />
+              </div>
             ))}
           </div>
         </section>

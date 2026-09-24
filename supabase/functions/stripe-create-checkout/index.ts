@@ -115,7 +115,7 @@ serve(async (req) => {
     };
 
     if (!isTestMode) {
-      params["payment_intent_data[application_fee_amount]"] = String(protection);
+      params["payment_intent_data[application_fee_amount]"] = String(protection + postage);
       params["payment_intent_data[transfer_data][destination]"] = seller.stripe_account_id!;
     } else {
       // TEST MODE - no transfer
