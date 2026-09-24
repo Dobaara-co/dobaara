@@ -99,6 +99,46 @@ export interface Database {
           tryon_cost_pence: number | null
           active_boost_type: 'featured' | 'spotlight' | null
           active_boost_expires_at: string | null
+          blouse_bust_cm: number | null
+          blouse_waist_cm: number | null
+          blouse_length_cm: number | null
+          shoulder_cm: number | null
+          sleeve_length_cm: number | null
+          blouse_margin_cm: number | null
+          skirt_waist_cm: number | null
+          skirt_length_cm: number | null
+          skirt_flare_cm: number | null
+          skirt_margin_cm: number | null
+          saree_length_cm: number | null
+          saree_width_cm: number | null
+          fall_pico_attached: boolean
+          blouse_included: boolean
+          kameez_bust_cm: number | null
+          kameez_waist_cm: number | null
+          kameez_hip_cm: number | null
+          kameez_length_cm: number | null
+          kameez_margin_cm: number | null
+          salwar_waist_cm: number | null
+          salwar_length_cm: number | null
+          anarkali_bust_cm: number | null
+          anarkali_waist_cm: number | null
+          anarkali_full_length_cm: number | null
+          anarkali_flare_cm: number | null
+          anarkali_margin_cm: number | null
+          sherwani_chest_cm: number | null
+          sherwani_full_length_cm: number | null
+          sherwani_margin_cm: number | null
+          trouser_waist_cm: number | null
+          trouser_length_cm: number | null
+          dupatta_included: boolean
+          dupatta_length_cm: number | null
+          dupatta_width_cm: number | null
+          margin_cm: number | null
+          stitching_status: 'stitched' | 'semi_stitched' | 'unstitched' | null
+          waist_type: 'elastic' | 'drawstring' | 'fixed' | 'zip' | null
+          height_min_cm: number | null
+          height_max_cm: number | null
+          alteration_notes: string | null
           created_at: string
           updated_at: string
         }
@@ -134,6 +174,46 @@ export interface Database {
           tags?: string[]
           active_boost_type?: 'featured' | 'spotlight' | null
           active_boost_expires_at?: string | null
+          blouse_bust_cm?: number | null
+          blouse_waist_cm?: number | null
+          blouse_length_cm?: number | null
+          shoulder_cm?: number | null
+          sleeve_length_cm?: number | null
+          blouse_margin_cm?: number | null
+          skirt_waist_cm?: number | null
+          skirt_length_cm?: number | null
+          skirt_flare_cm?: number | null
+          skirt_margin_cm?: number | null
+          saree_length_cm?: number | null
+          saree_width_cm?: number | null
+          fall_pico_attached?: boolean
+          blouse_included?: boolean
+          kameez_bust_cm?: number | null
+          kameez_waist_cm?: number | null
+          kameez_hip_cm?: number | null
+          kameez_length_cm?: number | null
+          kameez_margin_cm?: number | null
+          salwar_waist_cm?: number | null
+          salwar_length_cm?: number | null
+          anarkali_bust_cm?: number | null
+          anarkali_waist_cm?: number | null
+          anarkali_full_length_cm?: number | null
+          anarkali_flare_cm?: number | null
+          anarkali_margin_cm?: number | null
+          sherwani_chest_cm?: number | null
+          sherwani_full_length_cm?: number | null
+          sherwani_margin_cm?: number | null
+          trouser_waist_cm?: number | null
+          trouser_length_cm?: number | null
+          dupatta_included?: boolean
+          dupatta_length_cm?: number | null
+          dupatta_width_cm?: number | null
+          margin_cm?: number | null
+          stitching_status?: 'stitched' | 'semi_stitched' | 'unstitched' | null
+          waist_type?: 'elastic' | 'drawstring' | 'fixed' | 'zip' | null
+          height_min_cm?: number | null
+          height_max_cm?: number | null
+          alteration_notes?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -165,6 +245,46 @@ export interface Database {
           tags?: string[]
           active_boost_type?: 'featured' | 'spotlight' | null
           active_boost_expires_at?: string | null
+          blouse_bust_cm?: number | null
+          blouse_waist_cm?: number | null
+          blouse_length_cm?: number | null
+          shoulder_cm?: number | null
+          sleeve_length_cm?: number | null
+          blouse_margin_cm?: number | null
+          skirt_waist_cm?: number | null
+          skirt_length_cm?: number | null
+          skirt_flare_cm?: number | null
+          skirt_margin_cm?: number | null
+          saree_length_cm?: number | null
+          saree_width_cm?: number | null
+          fall_pico_attached?: boolean
+          blouse_included?: boolean
+          kameez_bust_cm?: number | null
+          kameez_waist_cm?: number | null
+          kameez_hip_cm?: number | null
+          kameez_length_cm?: number | null
+          kameez_margin_cm?: number | null
+          salwar_waist_cm?: number | null
+          salwar_length_cm?: number | null
+          anarkali_bust_cm?: number | null
+          anarkali_waist_cm?: number | null
+          anarkali_full_length_cm?: number | null
+          anarkali_flare_cm?: number | null
+          anarkali_margin_cm?: number | null
+          sherwani_chest_cm?: number | null
+          sherwani_full_length_cm?: number | null
+          sherwani_margin_cm?: number | null
+          trouser_waist_cm?: number | null
+          trouser_length_cm?: number | null
+          dupatta_included?: boolean
+          dupatta_length_cm?: number | null
+          dupatta_width_cm?: number | null
+          margin_cm?: number | null
+          stitching_status?: 'stitched' | 'semi_stitched' | 'unstitched' | null
+          waist_type?: 'elastic' | 'drawstring' | 'fixed' | 'zip' | null
+          height_min_cm?: number | null
+          height_max_cm?: number | null
+          alteration_notes?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -199,11 +319,6 @@ export interface Database {
           platform_fee_amount?: number | null
           seller_payout_amount?: number | null
           status?: string
-          item_price_amount?: number | null
-          buyer_protection_amount?: number | null
-          postage_amount?: number | null
-          platform_fee_amount?: number | null
-          seller_payout_amount?: number | null
           stripe_payment_intent_id?: string | null
           shipping_address?: Json | null
           created_at?: string
@@ -211,6 +326,11 @@ export interface Database {
         }
         Update: {
           status?: string
+          item_price_amount?: number | null
+          buyer_protection_amount?: number | null
+          postage_amount?: number | null
+          platform_fee_amount?: number | null
+          seller_payout_amount?: number | null
           stripe_payment_intent_id?: string | null
           shipping_address?: Json | null
           updated_at?: string
