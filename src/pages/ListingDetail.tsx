@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useListing, useListings } from "@/hooks/useListings";
 import { useSavedListings, useToggleSave } from "@/hooks/useSavedListings";
 import { formatPrice, conditionColors, conditionLabels, categoryLabels } from "@/data/seedData";
@@ -19,6 +19,7 @@ import { calculateCheckoutPricing } from "@/lib/pricing";
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
@@ -53,6 +54,12 @@ const ListingDetail = () => {
     const timer = setInterval(() => { refetch() }, 10_000)
     return () => clearInterval(timer)
   }, [data?.listing?.tryonStatus, refetch])
+
+  useEffect(() => {
+    if (searchParams.get('boost') !== 'success') return
+    toast({ title: 'Boost activated!', description: 'Your listing is boosted for 7 days.' })
+    refetch()
+  }, [searchParams, refetch, toast])
 
   usePageMeta({
     title: data?.listing ? `${data.listing.title} — Dobaara` : undefined,

@@ -327,7 +327,7 @@ const Account = () => {
                   {joined?.images?.[0] && <img src={joined.images[0]} alt="" className="h-12 w-12 rounded-md object-cover" />}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{joined?.title ?? 'Sold listing'}</p>
-                    <p className="text-xs capitalize text-muted-foreground">{order.status.replaceAll('_', ' ')}</p>
+                    <p className="text-xs capitalize text-muted-foreground">{order.status.replace(/_/g, ' ')}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-primary">Payout {formatPrice(payout)}</p>

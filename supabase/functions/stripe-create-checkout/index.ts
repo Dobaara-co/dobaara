@@ -43,6 +43,15 @@ serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const accessToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+    if (authError || !authData.user || authData.user.id !== buyer_id) {
+      return new Response(JSON.stringify({ error: "Not authorised" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Fetch listing with seller profile
     const { data: listing, error: listingError } = await supabase
@@ -115,8 +124,12 @@ serve(async (req) => {
     };
 
     if (!isTestMode) {
-      params["payment_intent_data[application_fee_amount]"] = String(protection);
-      params["payment_intent_data[transfer_data][destination]"] = seller.stripe_account_id!;
+      const connectedAccountId = seller.stripe_account_id;
+      if (!connectedAccountId) {
+        throw new Error("Seller payment account is unavailable");
+      }
+      params["payment_intent_data[application_fee_amount]"] = String(protection + postage);
+      params["payment_intent_data[transfer_data][destination]"] = connectedAccountId;
     } else {
       // TEST MODE - no transfer
     }
