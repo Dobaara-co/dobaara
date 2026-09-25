@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import dobaaraLogoAsset from "@/assets/dobaara-logo-trimmed.png.asset.json";
+const dobaaraLogoUrl = "/assets/dobaara-logo.png";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -108,7 +108,7 @@ const Navbar = () => {
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex h-12 w-[132px] shrink-0 items-center sm:w-[150px]" aria-label="Dobaara home">
             <img
-              src={dobaaraLogoAsset.url}
+              src={dobaaraLogoUrl}
               alt="Dobaara — Loved once, worn again"
               className="block h-auto max-h-11 w-full object-contain object-left"
             />

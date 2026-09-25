@@ -3,6 +3,7 @@ import { type Listing, formatPrice, conditionColors, conditionLabels, getSeller 
 import { useSavedListings, useToggleSave } from "@/hooks/useSavedListings";
 import { useAuth } from "@/contexts/AuthContext";
 import { SketchHeartIcon, SketchVerifiedIcon } from "@/components/CategoryIcons";
+import { boostLabel, effectiveBoostType } from "@/lib/listingBoosts";
 
 const ListingCard = ({ listing }: { listing: Listing }) => {
   const { user } = useAuth();
@@ -10,6 +11,7 @@ const ListingCard = ({ listing }: { listing: Listing }) => {
   const { data: savedSet } = useSavedListings();
   const toggleSave = useToggleSave();
   const seller = getSeller(listing.sellerId);
+  const activeBoost = effectiveBoostType(listing.activeBoostType, listing.activeBoostExpiresAt);
 
   const isSaved = savedSet?.has(listing.id) ?? false;
   const discount = listing.originalPrice
@@ -46,6 +48,12 @@ const ListingCard = ({ listing }: { listing: Listing }) => {
             <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-gold px-2.5 py-1 text-xs font-semibold text-accent-foreground shadow-sm">
               <SketchVerifiedIcon className="h-3 w-3" />
               Verified
+            </div>
+          )}
+
+          {activeBoost && (
+            <div className="absolute bottom-2 right-2 rounded-full border border-gold/40 bg-card/90 px-2 py-0.5 text-[10px] font-semibold text-primary shadow-sm backdrop-blur-sm">
+              {boostLabel(activeBoost)}
             </div>
           )}
 

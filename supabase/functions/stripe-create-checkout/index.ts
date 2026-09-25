@@ -82,6 +82,17 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Verify the caller is the buyer
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const accessToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+    if (authError || !authData.user || authData.user.id !== buyer_id) {
+      return new Response(JSON.stringify({ error: "Not authorised" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data: listing, error: listingError } = await supabase
       .from("listings")
       .select("*, profiles!seller_id(stripe_account_id, is_founding_seller, is_vip_seller)")
@@ -151,16 +162,17 @@ serve(async (req) => {
 
     let lineIndex = 1;
 
-    // Standard listings: buyer protection fee as explicit line item
+    // Standard listings: buyer protection as an explicit line item
     if (!listing.is_vip_verified) {
       params[`line_items[${lineIndex}][price_data][currency]`] = "gbp";
       params[`line_items[${lineIndex}][price_data][unit_amount]`] = String(fees.buyerProtectionFeePence);
-      params[`line_items[${lineIndex}][price_data][product_data][name]`] = "Buyer Protection Fee";
+      params[`line_items[${lineIndex}][price_data][product_data][name]`] = "Buyer Protection";
+      params[`line_items[${lineIndex}][price_data][product_data][description]`] =
+        "Dispute resolution, secure payment holding and guaranteed tracking";
       params[`line_items[${lineIndex}][quantity]`] = "1";
       lineIndex++;
     }
 
-    // Postage line item (when applicable)
     if (postagePence > 0) {
       params[`line_items[${lineIndex}][price_data][currency]`] = "gbp";
       params[`line_items[${lineIndex}][price_data][unit_amount]`] = String(postagePence);
@@ -171,15 +183,19 @@ serve(async (req) => {
     // ── Connect / payment intent data ─────────────────────────────────────────
 
     if (!isTestMode) {
+      const connectedAccountId = seller.stripe_account_id;
+      if (!connectedAccountId) {
+        throw new Error("Seller payment account is unavailable");
+      }
       params["payment_intent_data[application_fee_amount]"] = String(fees.platformFeePence);
-      params["payment_intent_data[transfer_data][destination]"] = seller.stripe_account_id!;
+      params["payment_intent_data[transfer_data][destination]"] = connectedAccountId;
 
       if (!listing.is_vip_verified) {
         // Standard: explicit transfer amount = item price only.
-        // Postage and buyer protection fee remain on platform account.
+        // Postage and buyer protection fee remain on the platform account.
         params["payment_intent_data[transfer_data][amount]"] = String(listing.price);
       }
-      // Verified: no explicit transfer amount; Stripe implicitly transfers
+      // Verified: no explicit transfer amount — Stripe implicitly transfers
       // (total - application_fee_amount) to the connected account.
     }
 

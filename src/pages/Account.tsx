@@ -14,6 +14,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LogOut, Package, CheckCircle2, Loader2, CreditCard, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSellerListings } from '@/hooks/useListings'
+import { useQuery } from '@tanstack/react-query'
+import { formatPrice } from '@/data/seedData'
 import { effectiveBoostType, boostDaysRemaining, boostLabel, BOOST_PRICES_PENCE } from '@/lib/listingBoosts'
 import type { BoostType } from '@/lib/listingBoosts'
 
@@ -34,6 +36,20 @@ const Account = () => {
   const [stripeLoading, setStripeLoading] = useState(false)
   const [boostingListingId, setBoostingListingId] = useState<string | null>(null)
   const { data: sellerListings = [] } = useSellerListings(user?.id)
+  const { data: sellerOrders = [] } = useQuery({
+    queryKey: ['orders', 'seller', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('id, status, created_at, seller_payout_amount, item_price_amount, listings(title, images)')
+        .eq('seller_id', user?.id ?? '')
+        .neq('status', 'pending')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    },
+  })
 
   const { register, handleSubmit, formState: { errors, isSubmitting, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -295,6 +311,34 @@ const Account = () => {
           </div>
         )}
       </div>
+
+      {sellerOrders.length > 0 && (
+        <div className="mb-8 rounded-lg border border-border bg-card p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">Orders &amp; payouts</span>
+          </div>
+          <div className="space-y-3">
+            {sellerOrders.map((order) => {
+              const joined = order.listings as unknown as { title: string; images: string[] } | null
+              const payout = order.item_price_amount ?? order.seller_payout_amount ?? 0
+              return (
+                <div key={order.id} className="flex items-center gap-3 border-b border-border py-2 last:border-0">
+                  {joined?.images?.[0] && <img src={joined.images[0]} alt="" className="h-12 w-12 rounded-md object-cover" />}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{joined?.title ?? 'Sold listing'}</p>
+                    <p className="text-xs capitalize text-muted-foreground">{order.status.replace(/_/g, ' ')}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-primary">Payout {formatPrice(payout)}</p>
+                    <p className="text-[11px] text-success">No commission deducted</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <h2 className="text-lg font-semibold">Edit Profile</h2>

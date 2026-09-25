@@ -56,6 +56,15 @@ serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const accessToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+    if (authError || !authData.user || authData.user.id !== seller_id) {
+      return new Response(JSON.stringify({ error: "Not authorised" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { data: listing, error: listingError } = await supabase
       .from("listings")
@@ -81,8 +90,8 @@ serve(async (req) => {
       "line_items[0][price_data][product_data][name]": `${BOOST_LABELS[boost_type]} — ${listing.title}`,
       "line_items[0][quantity]": "1",
       mode: "payment",
-      success_url: `https://www.dobaara.co/account?boost=success&listing=${listing_id}`,
-      cancel_url: `https://www.dobaara.co/account`,
+      success_url: `https://www.dobaara.co/listing/${listing_id}?boost=success`,
+      cancel_url: `https://www.dobaara.co/listing/${listing_id}`,
       "metadata[type]": "boost",
       "metadata[listing_id]": listing_id,
       "metadata[seller_id]": seller_id,

@@ -1,17 +1,17 @@
 export function calculateCommission(
   priceInPence: number,
   postageInPence: number,
-  isFoundingSeller: boolean,
-  isVipListing: boolean,
+  _isFoundingSeller: boolean,
+  _isVipListing: boolean,
 ): {
   totalAmount: number
   platformFee: number
   sellerPayout: number
   commissionRate: number
 } {
-  const commissionRate = isVipListing ? 0.25 : isFoundingSeller ? 0.08 : 0.10
+  const commissionRate = 0
   const totalAmount = priceInPence + postageInPence
-  const platformFee = Math.round(priceInPence * commissionRate)
-  const sellerPayout = totalAmount - platformFee
+  const platformFee = 0
+  const sellerPayout = priceInPence
   return { totalAmount, platformFee, sellerPayout, commissionRate }
 }

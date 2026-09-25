@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useListing, useListings } from "@/hooks/useListings";
 import { useSavedListings, useToggleSave } from "@/hooks/useSavedListings";
 import { formatPrice, conditionColors, conditionLabels, categoryLabels } from "@/data/seedData";
@@ -13,10 +13,13 @@ import { Loader2, Sparkles } from "lucide-react";
 import ModelSelector from "@/components/ModelSelector";
 import { usePageMeta } from "@/lib/seo";
 import ListingMeasurements from "@/components/ListingMeasurements";
+import BoostListingCard from "@/components/BoostListingCard";
+import { calculateCheckoutPricing } from "@/lib/pricing";
 
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
@@ -52,6 +55,12 @@ const ListingDetail = () => {
     return () => clearInterval(timer)
   }, [data?.listing?.tryonStatus, refetch])
 
+  useEffect(() => {
+    if (searchParams.get('boost') !== 'success') return
+    toast({ title: 'Boost activated!', description: 'Your listing is boosted for 7 days.' })
+    refetch()
+  }, [searchParams, refetch, toast])
+
   usePageMeta({
     title: data?.listing ? `${data.listing.title} — Dobaara` : undefined,
     description: data?.listing?.description?.slice(0, 150),
@@ -86,6 +95,11 @@ const ListingDetail = () => {
 
   const moreBySeller = sellerListings.filter((l) => l.sellerId === listing.sellerId && l.id !== listing.id).slice(0, 4);
   const similar = sellerListings.filter((l) => l.category === listing.category && l.id !== listing.id).slice(0, 4);
+  const isOwner = user?.id === listing.sellerId;
+  const checkoutPricing = calculateCheckoutPricing(
+    listing.price,
+    listing.freePostage ? 0 : listing.postagePrice,
+  );
 
   function handleSaveToggle() {
     if (!user) {
@@ -298,10 +312,26 @@ const ListingDetail = () => {
                 {checkoutLoading ? (
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Preparing checkout…</>
                 ) : (
-                  <>Buy Now — {formatPrice(listing.price + (listing.freePostage ? 0 : listing.postagePrice))}</>
+                  <>Buy Now — {formatPrice(listing.price)}</>
                 )}
               </Button>
             )}
+            <p className="-mt-1 text-center text-xs text-muted-foreground">
+              + buyer protection &amp; postage at checkout
+            </p>
+            <details className="rounded-md border border-border bg-secondary/30 px-3 py-2 text-xs">
+              <summary className="cursor-pointer font-medium text-primary">What's buyer protection?</summary>
+              <p className="mt-2 leading-relaxed text-muted-foreground">
+                It covers dispute resolution and holds your payment securely until delivery is confirmed.
+                Guaranteed tracking is included for every order.
+              </p>
+              <div className="mt-3 space-y-1 border-t border-border pt-2 text-muted-foreground">
+                <div className="flex justify-between"><span>Item price</span><span>{formatPrice(checkoutPricing.itemPrice)}</span></div>
+                <div className="flex justify-between"><span>Buyer protection</span><span>{formatPrice(checkoutPricing.buyerProtection)}</span></div>
+                <div className="flex justify-between"><span>Postage</span><span>{formatPrice(checkoutPricing.postage)}</span></div>
+                <div className="flex justify-between font-semibold text-foreground"><span>Total</span><span>{formatPrice(checkoutPricing.total)}</span></div>
+              </div>
+            </details>
             <div className="flex gap-3">
               <Button variant="heroOutline" size="lg" className="flex-1" onClick={handleMessageSeller}>
                 <MessageCircle className="h-4 w-4 mr-1" /> Make an Offer
@@ -327,6 +357,8 @@ const ListingDetail = () => {
           <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Shield className="h-3.5 w-3.5" /> Secure checkout powered by Stripe · Buyer protection included
           </div>
+
+          {isOwner && <BoostListingCard listing={listing} sellerId={listing.sellerId} />}
 
           {/* Seller card */}
           {seller && (

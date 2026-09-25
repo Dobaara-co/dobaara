@@ -828,6 +828,9 @@ const CreateListing = () => {
         {/* Pricing */}
         <div>
           <Label className="text-base font-semibold">Pricing</Label>
+          <p className="mt-1 text-sm text-muted-foreground">
+            You keep 100% of your listing price. Buyers cover protection and postage separately.
+          </p>
           <div className="mt-2 grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="price">

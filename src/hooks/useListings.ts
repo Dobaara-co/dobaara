@@ -157,6 +157,11 @@ export function useListings(filters: ListingFilters = {}) {
       if (filters.verifiedOnly) {
         query = query.eq('is_vip_verified', true)
       }
+      if (filters.spotlightOnly) {
+        query = query
+          .eq('active_boost_type', 'spotlight')
+          .gt('active_boost_expires_at', new Date().toISOString())
+      }
 
       switch (filters.sort) {
         case 'price_asc':

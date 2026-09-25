@@ -52,12 +52,14 @@ interface SaleEmailData {
 }
 
 function saleEmailHtml(d: SaleEmailData): string {
-  const rows = [
+  const rows: [string, string][] = [
     ["Item", formatPence(d.itemPricePence)],
     ...(d.buyerProtectionFeePence > 0
-      ? []
-      : [["Buyer protection (paid by buyer)", "—"]]),
-    ...(d.postagePence > 0 ? [["Postage (buyer paid)", formatPence(d.postagePence)]] : []),
+      ? [["Buyer protection (paid by buyer)", formatPence(d.buyerProtectionFeePence)] as [string, string]]
+      : []),
+    ...(d.postagePence > 0
+      ? [["Postage (buyer paid)", formatPence(d.postagePence)] as [string, string]]
+      : []),
     ["Your payout", `<strong>${formatPence(d.sellerPayoutPence)}</strong>`],
   ];
   const rowsHtml = rows
@@ -81,7 +83,7 @@ function saleEmailHtml(d: SaleEmailData): string {
           </div>
         </div>
         <div style="background:#f9f4ef;padding:16px 32px;font-size:12px;color:#999;border-top:1px solid #e8ddd0">
-          Dobaara · dobaara.co
+          No commission was deducted · Dobaara · dobaara.co
         </div>
       </div>
     </div>
@@ -183,7 +185,7 @@ serve(async (req) => {
       if (seller_id && order_id) {
         const { data: order } = await supabase
           .from("orders")
-          .select("amount, seller_payout_amount, seller_payout_pence, buyer_protection_fee_pence, postage_cost_pence, listings(title, price)")
+          .select("amount, seller_payout_pence, seller_payout_amount, buyer_protection_fee_pence, postage_cost_pence, listings(title, price)")
           .eq("id", order_id)
           .single();
 
