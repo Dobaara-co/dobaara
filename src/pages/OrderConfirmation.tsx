@@ -9,10 +9,14 @@ type OrderWithListing = {
   amount: number;
   status: string;
   created_at: string;
+  buyer_protection_fee_pence: number | null;
+  postage_cost_pence: number | null;
+  seller_payout_pence: number | null;
   listing: {
     id: string;
     title: string;
     images: string[];
+    price: number;
   } | null;
 };
 
@@ -76,7 +80,7 @@ const OrderConfirmation = () => {
       }
       const { data } = await supabase
         .from("orders")
-        .select("id, amount, status, created_at, listing:listings(id, title, images)")
+        .select("id, amount, status, created_at, buyer_protection_fee_pence, postage_cost_pence, seller_payout_pence, listing:listings(id, title, images, price)")
         .eq("id", orderId)
         .maybeSingle();
       if (!cancelled) {
@@ -119,6 +123,12 @@ const OrderConfirmation = () => {
   const thumbnail = order.listing?.images?.[0];
   const reference = order.id.slice(0, 8).toUpperCase();
 
+  // Use stored breakdown when available (new orders); fall back to total for legacy orders.
+  const itemPrice = order.listing?.price ?? order.amount;
+  const protectionFee = order.buyer_protection_fee_pence;
+  const postageFee = order.postage_cost_pence;
+  const hasBreakdown = protectionFee != null;
+
   const steps = [
     { icon: Bell, title: "Seller notified", desc: "The seller has received your order and will prepare your item." },
     { icon: Truck, title: "Item dispatched", desc: "You'll receive tracking details once your item is on its way." },
@@ -155,9 +165,36 @@ const OrderConfirmation = () => {
               <h2 className="font-display text-xl text-[#8B5E3C] truncate">
                 {order.listing?.title ?? "Listing"}
               </h2>
-              <p className="mt-1 font-body text-2xl text-[#3d2b1f] font-semibold">
-                {formatGbp(order.amount)}
-              </p>
+              {hasBreakdown ? (
+                <table className="mt-2 w-full text-sm">
+                  <tbody>
+                    <tr>
+                      <td className="py-0.5 text-[#5a3e2b]">Item price</td>
+                      <td className="py-0.5 text-right text-[#3d2b1f]">{formatGbp(itemPrice)}</td>
+                    </tr>
+                    {protectionFee! > 0 && (
+                      <tr>
+                        <td className="py-0.5 text-[#5a3e2b]">Buyer protection</td>
+                        <td className="py-0.5 text-right text-[#3d2b1f]">{formatGbp(protectionFee!)}</td>
+                      </tr>
+                    )}
+                    {postageFee != null && postageFee > 0 && (
+                      <tr>
+                        <td className="py-0.5 text-[#5a3e2b]">Postage</td>
+                        <td className="py-0.5 text-right text-[#3d2b1f]">{formatGbp(postageFee)}</td>
+                      </tr>
+                    )}
+                    <tr className="border-t border-[#C9A84C]/20">
+                      <td className="pt-1.5 font-semibold text-[#3d2b1f]">Total paid</td>
+                      <td className="pt-1.5 text-right font-semibold text-[#3d2b1f]">{formatGbp(order.amount)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              ) : (
+                <p className="mt-1 font-body text-2xl text-[#3d2b1f] font-semibold">
+                  {formatGbp(order.amount)}
+                </p>
+              )}
               <span className="inline-block mt-2 text-xs font-medium px-3 py-1 rounded-full bg-[#7A9B6E]/15 text-[#5a7a50] uppercase tracking-wider">
                 Payment confirmed
               </span>

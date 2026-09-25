@@ -10,11 +10,45 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function commissionRate(isFoundingSeller: boolean, isVipListing: boolean): number {
-  if (isVipListing) return 0.25;
-  if (isFoundingSeller) return 0.08;
-  return 0.10;
+// ── Fee calculation ───────────────────────────────────────────────────────────
+
+interface FeeBreakdown {
+  itemPricePence: number;
+  postagePence: number;
+  buyerProtectionFeePence: number;
+  platformFeePence: number;
+  sellerPayoutPence: number;
+  totalChargePence: number;
+  isVerified: boolean;
 }
+
+function calcFees(itemPricePence: number, postagePence: number, isVipVerified: boolean): FeeBreakdown {
+  if (isVipVerified) {
+    const platformFeePence = Math.round(itemPricePence * 0.25);
+    return {
+      itemPricePence,
+      postagePence,
+      buyerProtectionFeePence: 0,
+      platformFeePence,
+      sellerPayoutPence: itemPricePence - platformFeePence,
+      totalChargePence: itemPricePence + postagePence,
+      isVerified: true,
+    };
+  }
+  // Standard: buyer pays 3.5% + £0.30 flat; seller receives 100% of item price.
+  const buyerProtectionFeePence = Math.round(itemPricePence * 0.035) + 30;
+  return {
+    itemPricePence,
+    postagePence,
+    buyerProtectionFeePence,
+    platformFeePence: buyerProtectionFeePence,
+    sellerPayoutPence: itemPricePence,
+    totalChargePence: itemPricePence + buyerProtectionFeePence + postagePence,
+    isVerified: false,
+  };
+}
+
+// ── Stripe helper ─────────────────────────────────────────────────────────────
 
 async function stripePost(path: string, params: Record<string, string>) {
   const body = new URLSearchParams(params).toString();
@@ -28,6 +62,8 @@ async function stripePost(path: string, params: Record<string, string>) {
   });
   return res.json();
 }
+
+// ── Handler ───────────────────────────────────────────────────────────────────
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -46,7 +82,6 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch listing with seller profile
     const { data: listing, error: listingError } = await supabase
       .from("listings")
       .select("*, profiles!seller_id(stripe_account_id, is_founding_seller, is_vip_seller)")
@@ -68,24 +103,22 @@ serve(async (req) => {
       is_vip_seller: boolean;
     };
 
-    // Commission calculation
-    const postage = listing.free_postage ? 0 : (listing.postage_price ?? 0);
-    const totalAmount = listing.price + postage;
-    const rate = commissionRate(seller.is_founding_seller, listing.is_vip_verified);
-    const platformFee = Math.round(listing.price * rate);
-    const sellerPayout = totalAmount - platformFee;
+    const postagePence = listing.free_postage ? 0 : (listing.postage_price ?? 0);
+    const fees = calcFees(listing.price, postagePence, listing.is_vip_verified);
 
-    // Create pending order first so we have an ID for the success URL
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         listing_id,
         buyer_id,
         seller_id: listing.seller_id,
-        amount: totalAmount,
+        amount: fees.totalChargePence,
         status: "pending",
-        platform_fee_amount: platformFee,
-        seller_payout_amount: sellerPayout,
+        platform_fee_amount: fees.platformFeePence,
+        seller_payout_amount: fees.sellerPayoutPence,
+        buyer_protection_fee_pence: fees.buyerProtectionFeePence,
+        postage_cost_pence: fees.postagePence,
+        seller_payout_pence: fees.sellerPayoutPence,
       })
       .select("id")
       .single();
@@ -99,7 +132,8 @@ serve(async (req) => {
 
     const isTestMode = !seller.stripe_account_id || seller.stripe_account_id === "acct_test_placeholder";
 
-    // Build Stripe Checkout params
+    // ── Line items ────────────────────────────────────────────────────────────
+
     const params: Record<string, string> = {
       "payment_method_types[0]": "card",
       "line_items[0][price_data][currency]": "gbp",
@@ -115,25 +149,43 @@ serve(async (req) => {
       "metadata[order_id]": order.id,
     };
 
-    if (!isTestMode) {
-      params["payment_intent_data[application_fee_amount]"] = String(platformFee);
-      params["payment_intent_data[transfer_data][destination]"] = seller.stripe_account_id!;
-    } else {
-      // TEST MODE - no transfer
+    let lineIndex = 1;
+
+    // Standard listings: buyer protection fee as explicit line item
+    if (!listing.is_vip_verified) {
+      params[`line_items[${lineIndex}][price_data][currency]`] = "gbp";
+      params[`line_items[${lineIndex}][price_data][unit_amount]`] = String(fees.buyerProtectionFeePence);
+      params[`line_items[${lineIndex}][price_data][product_data][name]`] = "Buyer Protection Fee";
+      params[`line_items[${lineIndex}][quantity]`] = "1";
+      lineIndex++;
     }
 
-    // Add postage as a separate line item if applicable
-    if (postage > 0) {
-      params["line_items[1][price_data][currency]"] = "gbp";
-      params["line_items[1][price_data][unit_amount]"] = String(postage);
-      params["line_items[1][price_data][product_data][name]"] = "Postage & Packaging";
-      params["line_items[1][quantity]"] = "1";
+    // Postage line item (when applicable)
+    if (postagePence > 0) {
+      params[`line_items[${lineIndex}][price_data][currency]`] = "gbp";
+      params[`line_items[${lineIndex}][price_data][unit_amount]`] = String(postagePence);
+      params[`line_items[${lineIndex}][price_data][product_data][name]`] = "Postage & Packaging";
+      params[`line_items[${lineIndex}][quantity]`] = "1";
+    }
+
+    // ── Connect / payment intent data ─────────────────────────────────────────
+
+    if (!isTestMode) {
+      params["payment_intent_data[application_fee_amount]"] = String(fees.platformFeePence);
+      params["payment_intent_data[transfer_data][destination]"] = seller.stripe_account_id!;
+
+      if (!listing.is_vip_verified) {
+        // Standard: explicit transfer amount = item price only.
+        // Postage and buyer protection fee remain on platform account.
+        params["payment_intent_data[transfer_data][amount]"] = String(listing.price);
+      }
+      // Verified: no explicit transfer amount; Stripe implicitly transfers
+      // (total - application_fee_amount) to the connected account.
     }
 
     const session = await stripePost("/checkout/sessions", params);
 
     if (session.error) {
-      // Clean up the pending order if Stripe failed
       await supabase.from("orders").delete().eq("id", order.id);
       return new Response(JSON.stringify({ error: session.error.message }), {
         status: 400,
@@ -141,7 +193,6 @@ serve(async (req) => {
       });
     }
 
-    // Store the checkout session ID on the order for reconciliation
     await supabase
       .from("orders")
       .update({ stripe_payment_intent_id: session.payment_intent })

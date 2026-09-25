@@ -43,7 +43,29 @@ function formatPence(pence: number): string {
   return `£${(pence / 100).toFixed(2)}`;
 }
 
-function saleEmailHtml(itemName: string, salePrice: number, payoutAmount: number): string {
+interface SaleEmailData {
+  itemName: string;
+  itemPricePence: number;
+  buyerProtectionFeePence: number;
+  postagePence: number;
+  sellerPayoutPence: number;
+}
+
+function saleEmailHtml(d: SaleEmailData): string {
+  const rows = [
+    ["Item", formatPence(d.itemPricePence)],
+    ...(d.buyerProtectionFeePence > 0
+      ? []
+      : [["Buyer protection (paid by buyer)", "—"]]),
+    ...(d.postagePence > 0 ? [["Postage (buyer paid)", formatPence(d.postagePence)]] : []),
+    ["Your payout", `<strong>${formatPence(d.sellerPayoutPence)}</strong>`],
+  ];
+  const rowsHtml = rows
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600;width:200px">${label}</td><td style="padding:8px 0">${value}</td></tr>`,
+    )
+    .join("");
   return `
     <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
       <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">
@@ -52,12 +74,8 @@ function saleEmailHtml(itemName: string, salePrice: number, payoutAmount: number
           <p style="margin:4px 0 0;color:#C9A84C;font-size:13px">You've made a sale! 🎉</p>
         </div>
         <div style="padding:28px 32px;color:#3d2b1f">
-          <p style="font-size:16px;margin:0 0 16px">Great news — your item has sold!</p>
-          <table style="width:100%;border-collapse:collapse;font-size:14px">
-            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600;width:140px">Item</td><td style="padding:8px 0">${itemName}</td></tr>
-            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Sale price</td><td style="padding:8px 0">${formatPence(salePrice)}</td></tr>
-            <tr><td style="padding:8px 0;color:#8B5E3C;font-weight:600">Your payout</td><td style="padding:8px 0;font-weight:600">${formatPence(payoutAmount)}</td></tr>
-          </table>
+          <p style="font-size:16px;margin:0 0 16px">Great news — <strong>${d.itemName}</strong> has sold!</p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">${rowsHtml}</table>
           <div style="margin-top:20px;padding:16px;background:#fef9f0;border:1px solid #e8ddd0;border-radius:8px;font-size:14px">
             <strong>Next step:</strong> Please dispatch the item within 3 days. Your payout will be processed within 7 days of delivery confirmation.
           </div>
@@ -165,22 +183,24 @@ serve(async (req) => {
       if (seller_id && order_id) {
         const { data: order } = await supabase
           .from("orders")
-          .select("seller_payout_amount, amount, listings(title)")
+          .select("amount, seller_payout_amount, seller_payout_pence, buyer_protection_fee_pence, postage_cost_pence, listings(title, price)")
           .eq("id", order_id)
           .single();
 
         if (order) {
           const { data: authData } = await supabase.auth.admin.getUserById(seller_id);
           if (authData?.user?.email) {
-            const listing = order.listings as unknown as { title: string } | null;
+            const listingRow = order.listings as unknown as { title: string; price: number } | null;
             await sendEmailNotification(
               authData.user.email,
               "You've made a sale on Dobaara! 🎉",
-              saleEmailHtml(
-                listing?.title ?? "Your item",
-                order.amount,
-                order.seller_payout_amount ?? 0,
-              ),
+              saleEmailHtml({
+                itemName: listingRow?.title ?? "Your item",
+                itemPricePence: listingRow?.price ?? order.amount,
+                buyerProtectionFeePence: order.buyer_protection_fee_pence ?? 0,
+                postagePence: order.postage_cost_pence ?? 0,
+                sellerPayoutPence: order.seller_payout_pence ?? order.seller_payout_amount ?? 0,
+              }),
             );
           }
         }
