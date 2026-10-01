@@ -4,6 +4,7 @@ import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
 const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
+const STRIPE_CONNECT_WEBHOOK_SECRET = Deno.env.get("STRIPE_CONNECT_WEBHOOK_SECRET") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const SEND_EMAIL_URL = `${SUPABASE_URL}/functions/v1/send-email`;
@@ -121,9 +122,12 @@ serve(async (req) => {
 
     console.log("[stripe-webhook] Verifying signature, payload length:", payload.length);
 
-    const valid = await verifyStripeSignature(payload, signature, STRIPE_WEBHOOK_SECRET);
-    if (!valid) {
-      console.error("[stripe-webhook] Invalid signature");
+    const validPrimary = await verifyStripeSignature(payload, signature, STRIPE_WEBHOOK_SECRET);
+    const validConnect = STRIPE_CONNECT_WEBHOOK_SECRET
+      ? await verifyStripeSignature(payload, signature, STRIPE_CONNECT_WEBHOOK_SECRET)
+      : false;
+    if (!validPrimary && !validConnect) {
+      console.error("[stripe-webhook] Invalid signature against both secrets");
       return new Response("Invalid signature", { status: 400 });
     }
 
