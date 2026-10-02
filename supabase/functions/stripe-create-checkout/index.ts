@@ -187,16 +187,16 @@ serve(async (req) => {
       if (!connectedAccountId) {
         throw new Error("Seller payment account is unavailable");
       }
-      params["payment_intent_data[application_fee_amount]"] = String(fees.platformFeePence);
       params["payment_intent_data[transfer_data][destination]"] = connectedAccountId;
 
       if (!listing.is_vip_verified) {
-        // Standard: explicit transfer amount = item price only.
-        // Postage and buyer protection fee remain on the platform account.
+        // Standard: transfer exactly item price; platform retains buyer protection + postage.
+        // Do NOT also set application_fee_amount — that conflicts with transfer_data[amount].
         params["payment_intent_data[transfer_data][amount]"] = String(listing.price);
+      } else {
+        // VIP: platform takes 25% application fee; Stripe transfers remainder to connected account.
+        params["payment_intent_data[application_fee_amount]"] = String(fees.platformFeePence);
       }
-      // Verified: no explicit transfer amount — Stripe implicitly transfers
-      // (total - application_fee_amount) to the connected account.
     }
 
     const session = await stripePost("/checkout/sessions", params);
