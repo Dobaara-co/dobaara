@@ -14,7 +14,6 @@ import catSaree from "@/assets/cat-saree.jpg";
 import catAnarkali from "@/assets/cat-anarkali.jpg";
 import {
   SketchLockIcon,
-  SketchVerifiedIcon,
   SketchTruckIcon,
   SketchArrowRight,
   SketchSparkle,
