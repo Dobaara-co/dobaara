@@ -81,8 +81,8 @@ const SellingGuide = () => {
                 </AccordionTrigger>
                 <AccordionContent>
                   <ul className="space-y-2.5 pb-2">
-                    {s.bullets.map((b) => (
-                      <li key={b} className="flex gap-3 text-sm text-foreground/85 leading-relaxed">
+                    {s.bullets.map((b, i) => (
+                      <li key={i} className="flex gap-3 text-sm text-foreground/85 leading-relaxed">
                         <span className="mt-1.5 inline-block h-1.5 w-1.5 rounded-full bg-gold shrink-0" />
                         <span>{b}</span>
                       </li>
