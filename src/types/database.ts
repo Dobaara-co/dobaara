@@ -369,6 +369,7 @@ export interface Database {
           seller_id: string
           rating: number
           body: string | null
+          seller_response: string | null
           created_at: string
         }
         Insert: {
@@ -382,6 +383,7 @@ export interface Database {
         }
         Update: {
           body?: string | null
+          seller_response?: string | null
         }
         Relationships: []
       }

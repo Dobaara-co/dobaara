@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, Package, CheckCircle2, Loader2, CreditCard, Zap } from 'lucide-react'
+import { LogOut, Package, CheckCircle2, Loader2, CreditCard, Zap, Star, MessageSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSellerListings } from '@/hooks/useListings'
 import { useQuery } from '@tanstack/react-query'
@@ -35,7 +35,23 @@ const Account = () => {
   const queryClient = useQueryClient()
   const [stripeLoading, setStripeLoading] = useState(false)
   const [boostingListingId, setBoostingListingId] = useState<string | null>(null)
+  const [responseText, setResponseText] = useState<Record<string, string>>({})
+  const [submittingResponseId, setSubmittingResponseId] = useState<string | null>(null)
   const { data: sellerListings = [] } = useSellerListings(user?.id)
+  const { data: sellerReviews = [], refetch: refetchReviews } = useQuery({
+    queryKey: ['reviews', 'seller', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('id, rating, body, seller_response, created_at, reviewer_id')
+        .eq('seller_id', user?.id ?? '')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    },
+  })
+
   const { data: sellerOrders = [] } = useQuery({
     queryKey: ['orders', 'seller', user?.id],
     enabled: !!user?.id,
@@ -141,6 +157,23 @@ const Account = () => {
         variant: 'destructive',
       })
       setBoostingListingId(null)
+    }
+  }
+
+  async function submitResponse(reviewId: string) {
+    const text = (responseText[reviewId] ?? '').trim()
+    if (!text) return
+    setSubmittingResponseId(reviewId)
+    const { error } = await supabase
+      .from('reviews')
+      .update({ seller_response: text })
+      .eq('id', reviewId)
+    setSubmittingResponseId(null)
+    if (error) {
+      toast({ title: 'Could not save response', description: error.message, variant: 'destructive' })
+    } else {
+      setResponseText((prev) => { const next = { ...prev }; delete next[reviewId]; return next })
+      refetchReviews()
     }
   }
 
@@ -336,6 +369,62 @@ const Account = () => {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {sellerReviews.length > 0 && (
+        <div className="mb-8 rounded-lg border border-border bg-card p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Star className="h-4 w-4 text-gold" />
+            <span className="text-sm font-semibold">Reviews received</span>
+          </div>
+          <div className="space-y-4">
+            {sellerReviews.map((review) => (
+              <div key={review.id} className="border-b border-border pb-4 last:border-0 last:pb-0">
+                <div className="flex items-center gap-1 mb-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-3.5 w-3.5 ${i < review.rating ? 'fill-gold text-gold' : 'text-muted-foreground/30'}`}
+                    />
+                  ))}
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
+                {review.body && <p className="text-sm text-foreground mb-2">{review.body}</p>}
+
+                {review.seller_response ? (
+                  <div className="mt-2 rounded-md bg-muted/50 border border-border px-3 py-2">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <MessageSquare className="h-3 w-3 text-primary" />
+                      <span className="text-xs font-semibold text-primary">Your response</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{review.seller_response}</p>
+                  </div>
+                ) : (
+                  <div className="mt-2">
+                    <Textarea
+                      rows={2}
+                      placeholder="Write a public response to this review…"
+                      className="text-xs"
+                      value={responseText[review.id] ?? ''}
+                      onChange={(e) => setResponseText((prev) => ({ ...prev, [review.id]: e.target.value }))}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-1.5 text-xs h-7"
+                      disabled={!responseText[review.id]?.trim() || submittingResponseId === review.id}
+                      onClick={() => submitResponse(review.id)}
+                    >
+                      {submittingResponseId === review.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Post response'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
