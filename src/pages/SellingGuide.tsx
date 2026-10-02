@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/accordion";
 import { SketchTagIcon, SketchArrowRight } from "@/components/CategoryIcons";
 
-const sections = [
+const sections: { id: string; title: string; bullets: ReactNode[] }[] = [
   {
     id: "photos",
     title: "Photography tips",
@@ -26,7 +27,7 @@ const sections = [
     bullets: [
       "Research what similar items have sold for on Dobaara",
       "A good starting point: 25–40% of the original retail price for Very Good condition",
-      "Designer pieces (Sabyasachi, Manish Malhotra etc) hold value better — you can price at 40–60%",
+      "Well-known or luxury boutique pieces often hold value better — if you're confident of the maker, mention it in your description, but only use a specific designer name if you can show proof of purchase or authenticity. Otherwise describe the style and craftsmanship instead.",
       "Excellent condition commands a premium — mention it prominently in your description",
       "Free postage increases buyer conversion significantly",
     ],
@@ -46,7 +47,7 @@ const sections = [
     id: "measurements",
     title: "Measurements",
     bullets: [
-      "Always fill in all measurements — bust, waist, hips, length",
+      <>Fill in every measurement field for your item's category — these are different for a lehenga (blouse and skirt separately), a saree, a salwar kameez, an anarkali or a sherwani. Include the margin measurement too, it tells buyers how much a piece can be taken in or let out, and listings with margin recorded sell faster. See our <Link to="/size-guide" className="text-gold underline underline-offset-2 hover:text-primary">size guide</Link> for how to measure each garment type and margin.</>,
       "Measure the garment flat, not yourself",
       "Buyers in South Asian fashion know their measurements — accurate sizing = faster sales",
     ],
@@ -80,8 +81,8 @@ const SellingGuide = () => {
                 </AccordionTrigger>
                 <AccordionContent>
                   <ul className="space-y-2.5 pb-2">
-                    {s.bullets.map((b) => (
-                      <li key={b} className="flex gap-3 text-sm text-foreground/85 leading-relaxed">
+                    {s.bullets.map((b, i) => (
+                      <li key={i} className="flex gap-3 text-sm text-foreground/85 leading-relaxed">
                         <span className="mt-1.5 inline-block h-1.5 w-1.5 rounded-full bg-gold shrink-0" />
                         <span>{b}</span>
                       </li>
