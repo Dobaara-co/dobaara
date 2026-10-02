@@ -17,7 +17,7 @@ const pillars = [
   {
     Icon: SketchVerifiedIcon,
     title: "Trust at every step",
-    body: "Verified sellers, secure payments, and the Dobaara Verified concierge service for premium pieces.",
+    body: "Secure payments, tracked postage, and the Dobaara Verified concierge service for premium pieces.",
   },
 ];
 

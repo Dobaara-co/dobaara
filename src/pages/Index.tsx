@@ -14,7 +14,6 @@ import catSaree from "@/assets/cat-saree.jpg";
 import catAnarkali from "@/assets/cat-anarkali.jpg";
 import {
   SketchLockIcon,
-  SketchVerifiedIcon,
   SketchTruckIcon,
   SketchArrowRight,
   SketchSparkle,
@@ -97,7 +96,6 @@ const Index = () => {
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><SketchLockIcon className="h-4 w-4 text-primary" /> Secure Payments</span>
-              <span className="flex items-center gap-1.5"><SketchVerifiedIcon className="h-4 w-4 text-primary" /> Verified Sellers</span>
               <span className="flex items-center gap-1.5"><SketchTruckIcon className="h-4 w-4 text-primary" /> Tracked Postage</span>
             </div>
           </div>
@@ -245,7 +243,7 @@ const Index = () => {
             <div className="space-y-4">
               {[
                 { step: "1", title: "Every category covered", desc: "From lehengas to sherwanis — every category covered." },
-                { step: "2", title: "Buy with confidence", desc: "Verified sellers, secure payments, tracked postage." },
+                { step: "2", title: "Buy with confidence", desc: "Secure payments, tracked postage." },
                 { step: "3", title: "Wear it again", desc: "Beautiful outfits at a fraction of the original price." },
               ].map((item) => (
                 <div key={item.step} className="flex gap-4 items-start">
@@ -358,9 +356,6 @@ const Index = () => {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 md:gap-10 text-xs md:text-sm text-muted-foreground">
             <span className="flex items-center gap-2">
               <SketchLockIcon className="h-4 w-4 text-primary" /> Secure Payments
-            </span>
-            <span className="flex items-center gap-2">
-              <SketchVerifiedIcon className="h-4 w-4 text-primary" /> Verified Sellers
             </span>
             <span className="flex items-center gap-2">
               <SketchTruckIcon className="h-4 w-4 text-primary" /> Tracked Delivery
