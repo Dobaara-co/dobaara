@@ -72,9 +72,9 @@ function saleEmailHtml(d: SaleEmailData): string {
   return `
     <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
       <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">
-        <div style="background:#8B5E3C;padding:24px 32px">
-          <h1 style="margin:0;color:#fff;font-size:22px;letter-spacing:0.08em">DOBAARA</h1>
-          <p style="margin:4px 0 0;color:#C9A84C;font-size:13px">You've made a sale! 🎉</p>
+        <div style="background:#FAF7F2;padding:24px 32px;text-align:center;border-bottom:2px solid #C9A84C">
+          <img src="https://www.dobaara.co/assets/dobaara-logo.png" alt="Dobaara — Loved once, worn again" width="180" style="max-width:180px;height:auto;display:block;margin:0 auto"/>
+          <p style="margin:12px 0 0;color:#8B5E3C;font-size:13px;font-weight:600;letter-spacing:0.04em">You've made a sale! 🎉</p>
         </div>
         <div style="padding:28px 32px;color:#3d2b1f">
           <p style="font-size:16px;margin:0 0 16px">Great news — <strong>${d.itemName}</strong> has sold!</p>
@@ -84,7 +84,7 @@ function saleEmailHtml(d: SaleEmailData): string {
           </div>
         </div>
         <div style="background:#f9f4ef;padding:16px 32px;font-size:12px;color:#999;border-top:1px solid #e8ddd0">
-          No commission was deducted · Dobaara · dobaara.co
+          No commission was deducted · © 2026 Dobaara · dobaara.co
         </div>
       </div>
     </div>
@@ -95,18 +95,16 @@ function paymentFailedHtml(itemName: string): string {
   return `
     <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
       <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">
-        <div style="background:#8B5E3C;padding:24px 32px">
-          <h1 style="margin:0;color:#fff;font-size:22px;letter-spacing:0.08em">DOBAARA</h1>
+        <div style="background:#FAF7F2;padding:24px 32px;text-align:center;border-bottom:2px solid #C9A84C">
+          <img src="https://www.dobaara.co/assets/dobaara-logo.png" alt="Dobaara — Loved once, worn again" width="180" style="max-width:180px;height:auto;display:block;margin:0 auto"/>
         </div>
         <div style="padding:28px 32px;color:#3d2b1f">
           <p style="font-size:16px;margin:0 0 12px">Your payment for <strong>${itemName}</strong> could not be processed.</p>
           <p style="font-size:14px;color:#666">Please check your card details and try again, or use a different payment method.</p>
-          <a href="https://www.dobaara.co/browse" style="display:inline-block;margin-top:20px;background:#8B5E3C;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600">
-            Browse listings
-          </a>
+          <a href="https://www.dobaara.co/browse" style="display:inline-block;margin-top:20px;background:#8B5E3C;color:#fff;text-decoration:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;white-space:nowrap">Browse listings</a>
         </div>
         <div style="background:#f9f4ef;padding:16px 32px;font-size:12px;color:#999;border-top:1px solid #e8ddd0">
-          Dobaara · dobaara.co
+          © 2026 Dobaara · dobaara.co
         </div>
       </div>
     </div>
