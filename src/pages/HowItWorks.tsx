@@ -16,7 +16,7 @@ const buyerSteps = [
   {
     n: "2",
     title: "Buy with confidence",
-    body: "Every seller is verified. Secure checkout powered by Stripe. Your payment is protected.",
+    body: "Secure checkout powered by Stripe. Your payment is protected until delivery is confirmed.",
   },
   {
     n: "3",
