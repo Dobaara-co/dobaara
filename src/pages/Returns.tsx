@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+
 
 type Section = { title: string; body: ReactNode };
 type Part = { heading: string; intro?: ReactNode; sections: Section[] };
