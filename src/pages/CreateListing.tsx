@@ -22,6 +22,19 @@ const MARGIN_HELP =
 
 const STRUCTURED_CATEGORIES = new Set(['lehenga', 'saree', 'salwar_kameez', 'anarkali', 'sherwani'])
 
+// Brands where naming the designer requires proof of purchase/authenticity.
+// Matching is case-sensitive exact match after trim. Extend this list as needed.
+const KNOWN_DESIGNERS = new Set([
+  // From seed data
+  'Sabyasachi', 'Manish Malhotra', 'Anita Dongre', 'Tarun Tahiliani',
+  'Ritu Kumar', 'Fabindia', 'BIBA', 'Manyavar',
+  // Additional well-known / commonly aped South Asian designers
+  'Abu Jani Sandeep Khosla', 'Rohit Bal', 'Neeta Lulla', 'Ritu Beri',
+  'Vikram Phadnis', 'Anju Modi', 'Monisha Jaising', 'Raghavendra Rathore',
+  'JJ Valaya', 'Gaurav Gupta', 'Falguni Shane Peacock', 'Shyamal Bhumika',
+  'Punit Balana', 'Rimple Harpreet Narula', 'Anamika Khanna',
+])
+
 const numOrNull = (v: unknown): number | null => {
   if (v === '' || v == null) return null
   const n = Number(v)
@@ -154,6 +167,21 @@ const schema = z
     margin_cm: num,
   })
   .superRefine((data, ctx) => {
+    // Reject "[KnownDesigner] Style" — trademark / DMCA risk
+    if (data.designer_brand) {
+      const val = data.designer_brand.trim()
+      for (const name of KNOWN_DESIGNERS) {
+        if (val.toLowerCase().startsWith(`${name.toLowerCase()} style`)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['designer_brand'],
+            message: `Enter just "${name}" — "${name} Style" is not allowed as a brand name. If you own a genuine piece, upload proof of purchase below.`,
+          })
+          break
+        }
+      }
+    }
+
     const req = (field: string, label: string) => {
       const v = data[field as keyof typeof data]
       if (v === '' || v == null) {
@@ -194,6 +222,9 @@ const CreateListing = () => {
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
+  const [proofFile, setProofFile] = useState<File | null>(null)
+  const [proofPreview, setProofPreview] = useState<string | null>(null)
+  const [proofError, setProofError] = useState<string | null>(null)
 
   const {
     register,
@@ -205,9 +236,11 @@ const CreateListing = () => {
     defaultValues: { free_postage: false, postage_price: 0, fall_pico_attached: false, blouse_included: false, dupatta_included: false },
   })
 
-  const [category, blouseIncluded, dupattaIncluded, freePostage] = watch([
-    'category', 'blouse_included', 'dupatta_included', 'free_postage',
+  const [category, blouseIncluded, dupattaIncluded, freePostage, designerBrand] = watch([
+    'category', 'blouse_included', 'dupatta_included', 'free_postage', 'designer_brand',
   ])
+
+  const isKnownDesigner = KNOWN_DESIGNERS.has((designerBrand ?? '').trim())
 
   if (!user || !profile) {
     navigate('/auth', { state: { from: '/sell' } })
@@ -229,6 +262,21 @@ const CreateListing = () => {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index))
   }
 
+  function handleProofSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setProofFile(file)
+    setProofError(null)
+    const reader = new FileReader()
+    reader.onload = (ev) => setProofPreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  function removeProof() {
+    setProofFile(null)
+    setProofPreview(null)
+  }
+
   async function uploadImages(): Promise<string[]> {
     const urls: string[] = []
     for (const file of imageFiles) {
@@ -247,6 +295,10 @@ const CreateListing = () => {
       toast({ title: 'Add at least one photo', variant: 'destructive' })
       return
     }
+    if (isKnownDesigner && !proofFile) {
+      setProofError('Please upload proof of purchase or authenticity for this designer.')
+      return
+    }
     setUploading(true)
     let imageUrls: string[] = []
     try {
@@ -256,6 +308,21 @@ const CreateListing = () => {
       setUploading(false)
       return
     }
+
+    let proofImageUrl: string | null = null
+    if (proofFile) {
+      const ext = proofFile.name.split('.').pop()
+      const path = `proof/${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: proofErr } = await supabase.storage.from('listing-images').upload(path, proofFile)
+      if (proofErr) {
+        toast({ title: 'Proof upload failed', variant: 'destructive' })
+        setUploading(false)
+        return
+      }
+      const { data: proofData } = supabase.storage.from('listing-images').getPublicUrl(path)
+      proofImageUrl = proofData.publicUrl
+    }
+
     setUploading(false)
 
     const { data, error } = await supabase
@@ -269,6 +336,7 @@ const CreateListing = () => {
         condition: values.condition,
         colour: values.colour,
         designer_brand: values.designer_brand || null,
+        proof_image_url: proofImageUrl,
         size_label: values.size_label,
         price: Math.round(Number(values.price) * 100),
         original_price:
@@ -472,8 +540,48 @@ const CreateListing = () => {
           <div>
             <Label htmlFor="designer_brand">Designer / Brand</Label>
             <Input id="designer_brand" placeholder="e.g. Sabyasachi" {...register('designer_brand')} />
+            {errors.designer_brand && (
+              <p className="mt-1 text-xs text-destructive">{errors.designer_brand.message}</p>
+            )}
           </div>
         </div>
+
+        {/* Proof of purchase — required when brand is a known designer */}
+        {isKnownDesigner && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
+            <div>
+              <p className="text-sm font-medium text-amber-900">
+                Proof of purchase required
+              </p>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Because you've named a specific designer, you must upload a receipt, authenticity
+                certificate, or clear label photo before publishing.
+              </p>
+            </div>
+            {proofPreview ? (
+              <div className="flex items-center gap-3">
+                <div className="relative h-20 w-20 shrink-0 rounded-lg overflow-hidden border border-amber-300">
+                  <img src={proofPreview} className="h-full w-full object-cover" alt="proof" />
+                  <button
+                    type="button"
+                    onClick={removeProof}
+                    className="absolute top-1 right-1 rounded-full bg-foreground/70 p-0.5 text-background"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+                <p className="text-xs text-amber-800">Proof uploaded. Remove to replace.</p>
+              </div>
+            ) : (
+              <label className="flex h-20 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-amber-300 hover:border-amber-500 transition-colors bg-white">
+                <Upload className="h-5 w-5 text-amber-600" />
+                <span className="text-xs text-amber-700 mt-1">Upload proof of purchase</span>
+                <input type="file" accept="image/*" className="sr-only" onChange={handleProofSelect} />
+              </label>
+            )}
+            {proofError && <p className="text-xs text-destructive">{proofError}</p>}
+          </div>
+        )}
 
         {/* Size */}
         <div>

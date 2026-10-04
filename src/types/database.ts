@@ -97,6 +97,7 @@ export interface Database {
           tryon_task_id: string | null
           tryon_error: string | null
           tryon_cost_pence: number | null
+          proof_image_url: string | null
           active_boost_type: 'featured' | 'spotlight' | null
           active_boost_expires_at: string | null
           blouse_bust_cm: number | null
@@ -174,6 +175,7 @@ export interface Database {
           tags?: string[]
           active_boost_type?: 'featured' | 'spotlight' | null
           active_boost_expires_at?: string | null
+          proof_image_url?: string | null
           blouse_bust_cm?: number | null
           blouse_waist_cm?: number | null
           blouse_length_cm?: number | null
@@ -245,6 +247,7 @@ export interface Database {
           tags?: string[]
           active_boost_type?: 'featured' | 'spotlight' | null
           active_boost_expires_at?: string | null
+          proof_image_url?: string | null
           blouse_bust_cm?: number | null
           blouse_waist_cm?: number | null
           blouse_length_cm?: number | null
