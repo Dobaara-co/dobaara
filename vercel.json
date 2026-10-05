@@ -1,4 +1,8 @@
 {
+  "redirects": [
+    { "source": "/home", "destination": "/", "permanent": true },
+    { "source": "/waitlist", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/(.*)", "destination": "/" }
