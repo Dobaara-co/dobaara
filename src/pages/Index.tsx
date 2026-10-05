@@ -162,6 +162,7 @@ const Index = () => {
       </section>
 
       {/* New Listings */}
+      {(isLoading || recentListings.length > 0) && (
       <section className="container py-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">New Arrivals</h2>
@@ -183,6 +184,7 @@ const Index = () => {
           </div>
         )}
       </section>
+      )}
 
       {/* Spotlight */}
       {spotlightListings.length > 0 && (

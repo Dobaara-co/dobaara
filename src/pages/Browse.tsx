@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { categoryLabels, conditionLabels } from "@/data/seedData";
 import { useListings, type ListingFilters } from "@/hooks/useListings";
 import { useMyMeasurements } from "@/hooks/useMyMeasurements";
@@ -195,11 +195,21 @@ const Browse = () => {
             </div>
           )}
           {!isLoading && filtered.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-lg font-semibold">No listings found</p>
-              <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters</p>
-              <Button variant="outline" className="mt-4" onClick={clearAll}>Clear filters</Button>
-            </div>
+            activeFilters === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-lg font-semibold">No listings yet.</p>
+                <p className="text-sm text-muted-foreground mt-1">Be one of the first sellers on Dobaara.</p>
+                <Link to="/sell">
+                  <Button className="mt-4">Start Selling</Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-lg font-semibold">No listings found</p>
+                <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters</p>
+                <Button variant="outline" className="mt-4" onClick={clearAll}>Clear filters</Button>
+              </div>
+            )
           )}
         </div>
       </div>
