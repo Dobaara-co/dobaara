@@ -139,7 +139,7 @@ const Index = () => {
           <h2 className="font-display text-2xl md:text-3xl font-semibold text-primary">
             Dobaara Verified
           </h2>
-          <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto text-balance">
             We photograph, authenticate and ship — so you don't have to.
           </p>
         </div>
