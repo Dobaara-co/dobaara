@@ -5,7 +5,6 @@ const BASE_URL = 'https://www.dobaara.co'
 
 const STATIC_PAGES = [
   { loc: '/',                  priority: '1.0', changefreq: 'daily'   },
-  { loc: '/home',              priority: '1.0', changefreq: 'daily'   },
   { loc: '/browse',            priority: '0.9', changefreq: 'hourly'  },
   { loc: '/how-it-works',      priority: '0.7', changefreq: 'monthly' },
   { loc: '/dobaara-verified',  priority: '0.7', changefreq: 'monthly' },

@@ -1,12 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Waitlist from "./pages/Waitlist.tsx";
 import Index from "./pages/Index.tsx";
 import Browse from "./pages/Browse.tsx";
 import ListingDetail from "./pages/ListingDetail.tsx";
@@ -36,18 +35,13 @@ const queryClient = new QueryClient({
   },
 });
 
-// Hide marketplace chrome on the standalone pre-launch landing page.
-const Chrome = ({ children }: { children: React.ReactNode }) => {
-  const { pathname } = useLocation();
-  const bare = pathname === "/";
-  return (
-    <>
-      {!bare && <Navbar />}
-      <main className="min-h-screen">{children}</main>
-      {!bare && <Footer />}
-    </>
-  );
-};
+const Chrome = ({ children }: { children: React.ReactNode }) => (
+  <>
+    <Navbar />
+    <main className="min-h-screen">{children}</main>
+    <Footer />
+  </>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -58,8 +52,9 @@ const App = () => (
         <BrowserRouter>
           <Chrome>
             <Routes>
-              <Route path="/" element={<Waitlist />} />
-              <Route path="/home" element={<Index />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<Navigate to="/" replace />} />
+              <Route path="/waitlist" element={<Navigate to="/" replace />} />
               <Route path="/browse" element={<Browse />} />
               <Route path="/listing/:id" element={<ListingDetail />} />
               <Route path="/auth" element={<Auth />} />
