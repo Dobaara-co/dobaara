@@ -9,7 +9,7 @@ interface AuthContextValue {
   profile: Profile | null
   loading: boolean
   signInWithEmail: (email: string, password: string) => Promise<void>
-  signUpWithEmail: (email: string, password: string) => Promise<void>
+  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
   signInWithApple: () => Promise<void>
   signOut: () => Promise<void>
@@ -58,8 +58,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error
   }
 
-  async function signUpWithEmail(email: string, password: string) {
-    const { error } = await supabase.auth.signUp({ email, password })
+  async function signUpWithEmail(email: string, password: string, firstName: string, lastName: string) {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          full_name: `${firstName} ${lastName}`.trim(),
+        },
+        emailRedirectTo: 'https://www.dobaara.co/auth/confirm',
+      },
+    })
     if (error) throw error
   }
 

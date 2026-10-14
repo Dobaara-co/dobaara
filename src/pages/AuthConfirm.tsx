@@ -5,8 +5,55 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase, sendEmail } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+
+function welcomeEmailHtml(firstName: string) {
+  return `
+  <div style="font-family:Georgia,'Times New Roman',serif;background:#FAF7F0;padding:40px 16px">
+    <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #E4DACB;border-radius:12px;overflow:hidden">
+
+      <div style="padding:36px 32px 28px;text-align:center;border-bottom:1px solid #EFE7DA">
+        <img src="https://www.dobaara.co/assets/dobaara-logo-email.png"
+             alt="Dobaara" width="180"
+             style="display:block;margin:0 auto;max-width:180px;height:auto" />
+        <p style="margin:14px 0 0;color:#8B5E3C;font-size:12px;letter-spacing:0.14em;text-transform:uppercase">
+          South Asian fashion, reimagined
+        </p>
+      </div>
+
+      <div style="padding:36px 32px;text-align:center;color:#1A1A1A">
+        <h1 style="margin:0 0 14px;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#8B5E3C">
+          Welcome to Dobaara, ${firstName}
+        </h1>
+        <p style="margin:0 0 28px;font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#4A4A4A">
+          You have joined a community giving beautiful outfits a second life.
+          Browse what is listed, or put your own pieces up for sale.
+        </p>
+
+        <a href="https://www.dobaara.co/browse"
+           style="display:inline-block;background:#8B5E3C;color:#ffffff;text-decoration:none;
+                  padding:13px 26px;border-radius:8px;font-family:'DM Sans',Helvetica,Arial,sans-serif;
+                  font-size:14px;font-weight:600;margin:0 4px 10px">
+          Browse listings
+        </a>
+        <a href="https://www.dobaara.co/sell"
+           style="display:inline-block;background:#ffffff;color:#8B5E3C;text-decoration:none;
+                  border:1px solid #C9A84C;padding:12px 26px;border-radius:8px;
+                  font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;margin:0 4px 10px">
+          List your first item
+        </a>
+      </div>
+
+      <div style="background:#FAF7F0;padding:18px 32px;text-align:center;border-top:1px solid #EFE7DA;
+                  font-family:'DM Sans',Helvetica,Arial,sans-serif;font-size:12px;color:#8A8A8A">
+        © 2026 Dobaara ·
+        <a href="https://www.dobaara.co" style="color:#8B5E3C;text-decoration:none">dobaara.co</a>
+      </div>
+
+    </div>
+  </div>`;
+}
 
 type Status = "loading" | "session" | "needs_login" | "error";
 
@@ -68,6 +115,15 @@ const AuthConfirm = () => {
 
         if (data.session) {
           setEmail(data.session.user.email ?? "");
+          // Send welcome email only on the actual confirmation page load (token_hash present)
+          if (token_hash) {
+            const firstName = (data.session.user.user_metadata?.first_name as string | undefined) ?? "there";
+            sendEmail({
+              to: data.session.user.email ?? "",
+              subject: "Welcome to Dobaara",
+              html: welcomeEmailHtml(firstName),
+            });
+          }
           setStatus("session");
         } else {
           // No session established — most likely user clicked confirmation link in a different browser

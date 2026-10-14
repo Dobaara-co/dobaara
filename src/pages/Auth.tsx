@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,48 +8,39 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/hooks/use-toast'
-import { supabase, sendEmail } from '@/lib/supabase'
 
-function welcomeEmailHtml(firstName: string) {
-  return `
-    <div style="font-family:sans-serif;background:#FAF7F2;padding:32px">
-      <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8ddd0">
-        <div style="background:#8B5E3C;padding:32px;text-align:center">
-          <h1 style="margin:0;color:#fff;font-size:28px;letter-spacing:0.12em">DOBAARA</h1>
-          <p style="margin:8px 0 0;color:#C9A84C;font-size:13px;letter-spacing:0.1em">South Asian fashion, reimagined.</p>
-        </div>
-        <div style="padding:36px 32px;text-align:center;color:#3d2b1f">
-          <h2 style="margin:0 0 12px;font-size:22px;color:#8B5E3C">Welcome to Dobaara, ${firstName}!</h2>
-          <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#5a3e2b">
-            You've joined a community of South Asian fashion lovers giving beautiful outfits a second life.
-          </p>
-          <div style="display:inline-flex;gap:12px;margin-bottom:8px">
-            <a href="https://www.dobaara.co/browse"
-               style="display:inline-block;background:#8B5E3C;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600">
-              Browse listings
-            </a>
-            <a href="https://www.dobaara.co/sell"
-               style="display:inline-block;background:#C9A84C;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600">
-              List your first item
-            </a>
-          </div>
-        </div>
-        <div style="background:#f9f4ef;padding:16px 32px;font-size:12px;color:#999;text-align:center;border-top:1px solid #e8ddd0">
-          © 2025 Dobaara · <a href="https://dobaara.co" style="color:#8B5E3C;text-decoration:none">dobaara.co</a>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-const schema = z.object({
+const signInSchema = z.object({
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
   email: z.string().email('Enter a valid email'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
-type FormValues = z.infer<typeof schema>
+
+const PASSWORD_MSG =
+  'Password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.'
+
+const signUpSchema = z.object({
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Enter a valid email'),
+  password: z.string().refine(
+    (val) => val.length >= 8 && /[A-Z]/.test(val) && /[a-z]/.test(val) && /[0-9]/.test(val),
+    { message: PASSWORD_MSG },
+  ),
+})
+
+type FormValues = {
+  first_name?: string
+  last_name?: string
+  email: string
+  password: string
+}
 
 const Auth = () => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const modeRef = useRef(mode)
+  modeRef.current = mode
+
   const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -57,23 +48,28 @@ const Auth = () => {
 
   const from = (location.state as { from?: string })?.from ?? '/'
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<FormValues>({
+    resolver: (data, context, options) =>
+      zodResolver(modeRef.current === 'signup' ? signUpSchema : signInSchema)(data, context, options),
   })
 
-  async function onSubmit({ email, password }: FormValues) {
+  function toggleMode() {
+    setMode(m => (m === 'signin' ? 'signup' : 'signin'))
+    reset()
+  }
+
+  async function onSubmit({ email, password, first_name, last_name }: FormValues) {
     try {
       if (mode === 'signin') {
         await signInWithEmail(email, password)
+        navigate(from, { replace: true })
       } else {
-        await signUpWithEmail(email, password)
-        toast({ title: 'Check your email', description: 'We sent you a confirmation link.' })
-        const firstName = email.split('@')[0].replace(/[^a-zA-Z]/g, '') || 'there'
-        const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
-        sendEmail({ to: email, subject: 'Welcome to Dobaara 🌸', html: welcomeEmailHtml(displayName) })
-        return
+        await signUpWithEmail(email, password, first_name ?? '', last_name ?? '')
+        toast({
+          title: 'Check your email',
+          description: 'Click the link we just sent to confirm your account.',
+        })
       }
-      navigate(from, { replace: true })
     } catch (err: unknown) {
       toast({
         title: 'Error',
@@ -95,7 +91,6 @@ const Auth = () => {
     }
   }
 
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -111,7 +106,6 @@ const Auth = () => {
         </div>
 
         {/* Apple Sign In hidden until it is configured. */}
-
 
         <Button
           variant="outline"
@@ -138,6 +132,20 @@ const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {mode === 'signup' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="first_name">First name</Label>
+                <Input id="first_name" type="text" placeholder="Priya" {...register('first_name')} />
+                {errors.first_name && <p className="mt-1 text-xs text-destructive">{errors.first_name.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="last_name">Last name</Label>
+                <Input id="last_name" type="text" placeholder="Sharma" {...register('last_name')} />
+                {errors.last_name && <p className="mt-1 text-xs text-destructive">{errors.last_name.message}</p>}
+              </div>
+            </div>
+          )}
           <div>
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="you@example.com" {...register('email')} />
@@ -147,6 +155,11 @@ const Auth = () => {
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" placeholder="••••••••" {...register('password')} />
             {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
+            {mode === 'signup' && !errors.password && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Must be at least 8 characters with an uppercase letter, a lowercase letter and a number.
+              </p>
+            )}
           </div>
           <Button variant="hero" className="w-full" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Please wait…' : mode === 'signin' ? 'Sign In' : 'Create Account'}
@@ -157,7 +170,7 @@ const Auth = () => {
           {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
           <button
             type="button"
-            onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+            onClick={toggleMode}
             className="font-medium text-primary hover:underline"
           >
             {mode === 'signin' ? 'Sign up' : 'Sign in'}
