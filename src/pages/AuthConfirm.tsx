@@ -72,6 +72,7 @@ const AuthConfirm = () => {
   const [status, setStatus] = useState<Status>("loading");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -114,16 +115,30 @@ const AuthConfirm = () => {
         if (cancelled) return;
 
         if (data.session) {
+          const name = (data.session.user.user_metadata?.first_name as string | undefined) ?? "";
           setEmail(data.session.user.email ?? "");
-          // Send welcome email only on the actual confirmation page load (token_hash present)
-          if (token_hash) {
-            const firstName = (data.session.user.user_metadata?.first_name as string | undefined) ?? "there";
+          setFirstName(name);
+
+          // Idempotent welcome email: only send if not already sent
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("welcome_email_sent_at")
+            .eq("id", data.session.user.id)
+            .single();
+
+          if (prof && prof.welcome_email_sent_at === null) {
             sendEmail({
               to: data.session.user.email ?? "",
               subject: "Welcome to Dobaara",
-              html: welcomeEmailHtml(firstName),
+              html: welcomeEmailHtml(name || "there"),
             });
+            supabase
+              .from("profiles")
+              .update({ welcome_email_sent_at: new Date().toISOString() })
+              .eq("id", data.session.user.id)
+              .then(() => {});
           }
+
           setStatus("session");
         } else {
           // No session established — most likely user clicked confirmation link in a different browser
@@ -145,6 +160,7 @@ const AuthConfirm = () => {
   useEffect(() => {
     if (user && status === "needs_login") {
       setEmail(user.email ?? "");
+      setFirstName((user.user_metadata?.first_name as string | undefined) ?? "");
       setStatus("session");
     }
   }, [user, status]);
@@ -194,7 +210,9 @@ const AuthConfirm = () => {
 
             <h1 className="font-display text-4xl text-[#8B5E3C]">Email confirmed!</h1>
             <p className="mt-3 text-[#5a3e2b] font-body">
-              Welcome to Dobaara. Your account is ready.
+              {firstName
+                ? `Welcome to Dobaara, ${firstName}. Your account is ready.`
+                : "Welcome to Dobaara. Your account is ready."}
             </p>
 
             <DiamondDivider />

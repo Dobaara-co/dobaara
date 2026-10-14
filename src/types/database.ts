@@ -22,6 +22,7 @@ export interface Database {
           stripe_onboarding_complete: boolean
           stripe_charges_enabled: boolean
           stripe_payouts_enabled: boolean
+          welcome_email_sent_at: string | null
           created_at: string
           updated_at: string
         }
@@ -40,6 +41,7 @@ export interface Database {
           stripe_onboarding_complete?: boolean
           stripe_charges_enabled?: boolean
           stripe_payouts_enabled?: boolean
+          welcome_email_sent_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -57,6 +59,7 @@ export interface Database {
           stripe_onboarding_complete?: boolean
           stripe_charges_enabled?: boolean
           stripe_payouts_enabled?: boolean
+          welcome_email_sent_at?: string | null
           updated_at?: string
         }
         Relationships: []
