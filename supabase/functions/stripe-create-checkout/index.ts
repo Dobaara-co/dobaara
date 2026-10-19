@@ -35,20 +35,27 @@ function calcFees(itemPricePence: number, postagePence: number, isVipVerified: b
       isVerified: true,
     };
   }
-  // Standard: buyer pays 3.5% + £0.30 flat; seller receives 100% of item price.
+  // Standard: buyer pays 3.5% + £0.30 flat; seller receives item price + postage.
   const buyerProtectionFeePence = Math.round(itemPricePence * 0.035) + 30;
   return {
     itemPricePence,
     postagePence,
     buyerProtectionFeePence,
     platformFeePence: buyerProtectionFeePence,
-    sellerPayoutPence: itemPricePence,
+    sellerPayoutPence: itemPricePence + postagePence,
     totalChargePence: itemPricePence + buyerProtectionFeePence + postagePence,
     isVerified: false,
   };
 }
 
-// ── Stripe helper ─────────────────────────────────────────────────────────────
+// ── Stripe helpers ────────────────────────────────────────────────────────────
+
+async function stripeGet(path: string): Promise<Record<string, unknown>> {
+  const res = await fetch(`https://api.stripe.com/v1${path}`, {
+    headers: { Authorization: `Bearer ${STRIPE_SECRET_KEY}` },
+  });
+  return res.json();
+}
 
 async function stripePost(path: string, params: Record<string, string>) {
   const body = new URLSearchParams(params).toString();
@@ -117,6 +124,22 @@ serve(async (req) => {
     const postagePence = listing.free_postage ? 0 : (listing.postage_price ?? 0);
     const fees = calcFees(listing.price, postagePence, listing.is_vip_verified);
 
+    const isTestMode = !seller.stripe_account_id || seller.stripe_account_id === "acct_test_placeholder";
+
+    // Live Stripe account check — bail before creating an order if seller can't receive funds
+    if (!isTestMode) {
+      const account = await stripeGet(`/accounts/${seller.stripe_account_id}`) as {
+        charges_enabled?: boolean;
+        payouts_enabled?: boolean;
+      };
+      if (!account.charges_enabled || !account.payouts_enabled) {
+        return new Response(
+          JSON.stringify({ error: "This seller is still setting up payments. Please check back soon." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -124,12 +147,12 @@ serve(async (req) => {
         buyer_id,
         seller_id: listing.seller_id,
         amount: fees.totalChargePence,
-        status: "pending",
+        item_price_amount: fees.itemPricePence,
+        buyer_protection_amount: fees.buyerProtectionFeePence,
+        postage_amount: fees.postagePence,
         platform_fee_amount: fees.platformFeePence,
         seller_payout_amount: fees.sellerPayoutPence,
-        buyer_protection_fee_pence: fees.buyerProtectionFeePence,
-        postage_cost_pence: fees.postagePence,
-        seller_payout_pence: fees.sellerPayoutPence,
+        status: "pending",
       })
       .select("id")
       .single();
@@ -140,8 +163,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const isTestMode = !seller.stripe_account_id || seller.stripe_account_id === "acct_test_placeholder";
 
     // ── Line items ────────────────────────────────────────────────────────────
 
@@ -190,9 +211,9 @@ serve(async (req) => {
       params["payment_intent_data[transfer_data][destination]"] = connectedAccountId;
 
       if (!listing.is_vip_verified) {
-        // Standard: transfer exactly item price; platform retains buyer protection + postage.
+        // Standard: transfer item price + postage; platform retains buyer protection fee only.
         // Do NOT also set application_fee_amount — that conflicts with transfer_data[amount].
-        params["payment_intent_data[transfer_data][amount]"] = String(listing.price);
+        params["payment_intent_data[transfer_data][amount]"] = String(fees.itemPricePence + fees.postagePence);
       } else {
         // VIP: platform takes 25% application fee; Stripe transfers remainder to connected account.
         params["payment_intent_data[application_fee_amount]"] = String(fees.platformFeePence);

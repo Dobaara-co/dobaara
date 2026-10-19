@@ -354,7 +354,7 @@ const Account = () => {
           <div className="space-y-3">
             {sellerOrders.map((order) => {
               const joined = order.listings as unknown as { title: string; images: string[] } | null
-              const payout = order.item_price_amount ?? order.seller_payout_amount ?? 0
+              const payout = order.seller_payout_amount ?? order.item_price_amount ?? 0
               return (
                 <div key={order.id} className="flex items-center gap-3 border-b border-border py-2 last:border-0">
                   {joined?.images?.[0] && <img src={joined.images[0]} alt="" className="h-12 w-12 rounded-md object-cover" />}
