@@ -10,7 +10,6 @@ import { supabase, sendEmail } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles } from "lucide-react";
-import ModelSelector from "@/components/ModelSelector";
 import { usePageMeta } from "@/lib/seo";
 import ListingMeasurements from "@/components/ListingMeasurements";
 import BoostListingCard from "@/components/BoostListingCard";
@@ -47,13 +46,6 @@ const ListingDetail = () => {
       setTryonHeroUrl(data.listing.tryonImageUrl)
     }
   }, [data?.listing?.tryonImageUrl])
-
-  // Auto-refetch every 10 s while a try-on is being generated
-  useEffect(() => {
-    if (data?.listing?.tryonStatus !== 'processing') return
-    const timer = setInterval(() => { refetch() }, 10_000)
-    return () => clearInterval(timer)
-  }, [data?.listing?.tryonStatus, refetch])
 
   useEffect(() => {
     if (searchParams.get('boost') !== 'success') return
@@ -186,11 +178,6 @@ const ListingDetail = () => {
                 <Sparkles className="h-3 w-3" /> Virtual Try-On
               </div>
             )}
-            {listing.tryonStatus === 'processing' && !tryonHeroUrl && (
-              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
-                <Loader2 className="h-3 w-3 animate-spin" /> Generating try-on…
-              </div>
-            )}
           </div>
 
           {/* Original listing photos as thumbnails */}
@@ -222,14 +209,6 @@ const ListingDetail = () => {
             </div>
           )}
 
-          {/* Model selector — Phase 2 */}
-          <ModelSelector
-            listingId={listing.id}
-            onTryonChange={(url) => {
-              setTryonHeroUrl(url)
-              setSelectedImage(0)
-            }}
-          />
         </div>
 
         {/* Details */}

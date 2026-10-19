@@ -325,10 +325,13 @@ const CreateListing = () => {
 
     setUploading(false)
 
+    const stripeReady = !!(profile.stripe_charges_enabled && profile.stripe_payouts_enabled)
+
     const { data, error } = await supabase
       .from('listings')
       .insert({
         seller_id: user!.id,
+        is_active: stripeReady,
         title: values.title,
         description: values.description,
         category: values.category,
@@ -410,10 +413,11 @@ const CreateListing = () => {
     }
 
     queryClient.invalidateQueries({ queryKey: ['listings'] })
-    supabase.functions.invoke('generate-tryon', { body: { listing_id: data.id } })
     toast({
-      title: 'Listing live!',
-      description: 'Your item is now on Dobaara. A virtual try-on is being generated.',
+      title: stripeReady ? 'Listing live!' : 'Draft saved',
+      description: stripeReady
+        ? 'Your item is now live on Dobaara.'
+        : 'Complete your payment setup in Account to publish it.',
     })
     navigate(`/listing/${data.id}`)
   }
@@ -428,6 +432,13 @@ const CreateListing = () => {
     <div className="container py-10 max-w-2xl">
       <h1 className="text-3xl font-bold mb-2">List an Item</h1>
       <p className="text-muted-foreground mb-8">Sell your pre-loved South Asian fashion</p>
+
+      {(!profile.stripe_charges_enabled || !profile.stripe_payouts_enabled) && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 mb-6">
+          <strong>Payment setup incomplete.</strong> Your listing will be saved as a draft until you{' '}
+          <Link to="/account" className="underline font-medium">complete your payment setup</Link>.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
